@@ -570,7 +570,7 @@ func (s *OrderService) createOrder(input orderCreateParams) (*models.Order, erro
 					"error", fetchErr,
 				)
 			} else if full != nil {
-				if cancelErr := s.cancelOrderWithChildren(full, true, false); cancelErr != nil {
+				if cancelErr := s.cancelOrderWithChildren(full, true); cancelErr != nil {
 					logger.Errorw("order_timeout_rollback_cancel_failed",
 						"order_id", order.ID,
 						"order_no", order.OrderNo,
