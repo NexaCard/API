@@ -195,6 +195,11 @@ func (h *Handler) GetConfig(c *gin.Context) {
 		}
 	}
 
+	// 首页公告（仅在启用、处于排期内且内容非空时下发）
+	if announcement, ok := h.SettingService.GetActiveHomeAnnouncement(); ok {
+		data["announcement"] = announcement
+	}
+
 	_ = cache.SetJSON(c.Request.Context(), publicConfigCacheKey, data, publicConfigCacheTTL)
 	data["server_time"] = time.Now().UnixMilli()
 	data["app_version"] = version.Version
