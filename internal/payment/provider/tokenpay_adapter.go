@@ -62,11 +62,13 @@ func (a *tokenpayAdapter) CreatePayment(ctx context.Context, raw models.JSON, in
 	// tokenpay 特殊字段，用户标识符
 	orderUserKey, _ := input.Extra["order_user_key"].(string)
 
+	// Currency 是 TokenPay 的“加密货币币种”（如 USDT_TRC20 / TRX），必须取自渠道配置 cfg.Currency。
+	// 切勿使用 input.Currency——那是订单法币币种（CNY/USD 等），它对应 TokenPay 的 ActualAmount 金额币种。
 	native := tokenpay.CreateInput{
 		OutOrderID:   input.OrderNo,
 		OrderUserKey: orderUserKey,
 		ActualAmount: input.Amount.Decimal.String(),
-		Currency:     input.Currency,
+		Currency:     cfg.Currency,
 		NotifyURL:    input.NotifyURL,
 		RedirectURL:  input.ReturnURL,
 	}
@@ -110,10 +112,11 @@ func (a *tokenpayAdapter) VerifyCallback(raw models.JSON, _ map[string][]string,
 	// tokenpay 用 status int → PaymentStatusXxx string 映射
 	status := tokenpay.ToPaymentStatus(data.Status)
 
-	// amount 解析：tokenpay 的 Amount 是 string，直接 decimal.NewFromString
+	// 金额口径必须是法币（与订单 payment.Amount 一致）：TokenPay 回调里 ActualAmount 是法币金额，
+	// 而 Amount 是法币换算后的加密货币数量。业务层会用回调金额与 payment.Amount 严格比对，故取 ActualAmount。
 	// amount silent-fallback：失败时返回零值，wrapper 仅做适配，金额异常由业务层判定
 	amount := models.Money{}
-	if s := strings.TrimSpace(data.Amount); s != "" {
+	if s := strings.TrimSpace(data.ActualAmount); s != "" {
 		if d, parseErr := decimal.NewFromString(s); parseErr == nil {
 			amount = models.NewMoneyFromDecimal(d)
 		}
@@ -122,10 +125,11 @@ func (a *tokenpayAdapter) VerifyCallback(raw models.JSON, _ map[string][]string,
 	// PayTime 用 tokenpay.ParsePaidAt 解析（tokenpay 包暴露的 helper，处理时区）
 	paidAt := tokenpay.ParsePaidAt(data.PayTime)
 
-	// Currency 优先用 callback 数据，fallback cfg.Currency
-	currency := strings.ToUpper(strings.TrimSpace(data.Currency))
+	// Currency 口径必须是法币（与订单 payment.Currency 一致）：TokenPay 回调里 BaseCurrency 是法币币种，
+	// 而 Currency 是加密货币币种（USDT_TRC20/TRX 等）。优先用回调 BaseCurrency，fallback cfg.BaseCurrency。
+	currency := strings.ToUpper(strings.TrimSpace(data.BaseCurrency))
 	if currency == "" {
-		currency = strings.ToUpper(strings.TrimSpace(cfg.Currency))
+		currency = strings.ToUpper(strings.TrimSpace(cfg.BaseCurrency))
 	}
 
 	// Payload 通过 json.Marshal/Unmarshal CallbackData 序列化
