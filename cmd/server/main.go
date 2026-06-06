@@ -113,25 +113,16 @@ func main() {
 }
 
 func printStartupBanner() {
-	fmt.Println(ansiBrightMag + "╔══════════════════════════════════════════════════════════════════════╗" + ansiReset)
-	fmt.Println(ansiBrightMag + "║                      🚀 Dujiao-Next API 启动中                      ║" + ansiReset)
-	fmt.Println(ansiBrightMag + "╚══════════════════════════════════════════════════════════════════════╝" + ansiReset)
-	fmt.Println(ansiCyan + "██████╗ ██╗   ██╗     ██╗ █████╗  ██████╗      ███╗   ██╗███████╗██╗  ██╗████████╗" + ansiReset)
-	fmt.Println(ansiCyan + "██╔══██╗██║   ██║     ██║██╔══██╗██╔═══██╗     ████╗  ██║██╔════╝╚██╗██╔╝╚══██╔══╝" + ansiReset)
-	fmt.Println(ansiCyan + "██║  ██║██║   ██║     ██║███████║██║   ██║     ██╔██╗ ██║█████╗   ╚███╔╝    ██║   " + ansiReset)
-	fmt.Println(ansiCyan + "██║  ██║██║   ██║██   ██║██╔══██║██║   ██║     ██║╚██╗██║██╔══╝   ██╔██╗    ██║   " + ansiReset)
-	fmt.Println(ansiCyan + "██████╔╝╚██████╔╝╚█████╔╝██║  ██║╚██████╔╝     ██║ ╚████║███████╗██╔╝ ██╗   ██║   " + ansiReset)
-	fmt.Println(ansiCyan + "╚═════╝  ╚═════╝  ╚════╝ ╚═╝  ╚═╝ ╚═════╝      ╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝   ╚═╝   " + ansiReset)
-	fmt.Println(ansiGreen + ansiBold + "Open Source Repositories" + ansiReset)
-	fmt.Println(ansiBlue + "• Root:    https://github.com/dujiao-next" + ansiReset)
-	fmt.Println(ansiBlue + "• API:     https://github.com/dujiao-next/dujiao-next" + ansiReset)
-	fmt.Println(ansiBlue + "• User:    https://github.com/dujiao-next/user" + ansiReset)
-	fmt.Println(ansiBlue + "• Admin:   https://github.com/dujiao-next/admin" + ansiReset)
-	fmt.Println(ansiBlue + "• Official:https://github.com/dujiao-next/document" + ansiReset)
+	fmt.Println(ansiBrightMag + "==============================================================" + ansiReset)
+	fmt.Println(ansiBrightMag + "                     NexaCard API starting                    " + ansiReset)
+	fmt.Println(ansiBrightMag + "==============================================================" + ansiReset)
+	fmt.Println(ansiCyan + "Brand:   NexaCard" + ansiReset)
+	fmt.Println(ansiCyan + "API:     https://github.com/NexaCard/API" + ansiReset)
+	fmt.Println(ansiCyan + "User:    https://github.com/NexaCard/user" + ansiReset)
+	fmt.Println(ansiCyan + "Admin:   https://github.com/NexaCard/admin" + ansiReset)
 	fmt.Println(ansiGreen + "Version: " + version.Version + ansiReset)
 	fmt.Println(ansiDim + "--------------------------------------------------------------" + ansiReset)
 }
-
 func isWeakSecret(secret string) bool {
 	if len(secret) < 32 {
 		return true

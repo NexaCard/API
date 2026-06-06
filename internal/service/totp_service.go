@@ -29,7 +29,7 @@ var (
 )
 
 const (
-	totpIssuerDefault     = "Dujiao-Next"
+	totpIssuerDefault     = "NexaCard"
 	totpPendingTTL        = 10 * time.Minute
 	totpEnableMaxFailures = 5
 	totpRecoveryCodeCount = 10

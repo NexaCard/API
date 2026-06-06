@@ -1,6 +1,6 @@
-# Dujiao-Next API
+# NexaCard API
 
-Dujiao-Next API is the backend service for the Dujiao-Next ecosystem. It provides public APIs, user/auth APIs, order and payment workflows, and admin APIs.
+NexaCard API is the backend service for the NexaCard ecosystem. It provides public APIs, user/auth APIs, order and payment workflows, and admin APIs.
 
 ## Tech Stack
 
@@ -26,16 +26,8 @@ The default health check endpoint is:
 
 - `GET /health`
 
-## Online Documentation
+## Repositories
 
-- https://dujiao-next.com
-
-## Star History
-
-<a href="https://www.star-history.com/?repos=dujiao-next%2Fdujiao-next&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=dujiao-next/dujiao-next&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=dujiao-next/dujiao-next&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=dujiao-next/dujiao-next&type=date&legend=top-left" />
- </picture>
-</a>
+- API: https://github.com/NexaCard/API
+- User: https://github.com/NexaCard/user
+- Admin: https://github.com/NexaCard/admin

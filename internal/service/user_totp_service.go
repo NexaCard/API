@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	userTotpIssuerDefault     = "Dujiao-Next-User"
+	userTotpIssuerDefault     = "NexaCard-User"
 	userTotpPendingTTL        = 10 * time.Minute
 	userTotpEnableMaxFailures = 5
 	userTotpRecoveryCodeCount = 10
