@@ -45,6 +45,22 @@ func TestInitDefaultAdminMarksBootstrapAdminAsSuper(t *testing.T) {
 	}
 }
 
+func TestInitDefaultAdminSkipsWhenPasswordEmpty(t *testing.T) {
+	db := setupInitDefaultAdminTestDB(t)
+
+	if err := InitDefaultAdmin("root-admin", ""); err != nil {
+		t.Fatalf("init default admin with empty password failed: %v", err)
+	}
+
+	var count int64
+	if err := db.Model(&Admin{}).Count(&count).Error; err != nil {
+		t.Fatalf("count admins failed: %v", err)
+	}
+	if count != 0 {
+		t.Fatalf("empty bootstrap password should not create admin, got %d", count)
+	}
+}
+
 func TestInitDefaultAdminRepairsExistingBootstrapAdminSuperFlag(t *testing.T) {
 	db := setupInitDefaultAdminTestDB(t)
 

@@ -92,7 +92,9 @@ upload:
 
 cors:
   allowed_origins:
-    - "*"
+    # release 模式必须改成明确域名，不能使用 "*"
+    - "https://shop.example.com"
+    - "https://admin.example.com"
   allowed_methods:
     - GET
     - POST

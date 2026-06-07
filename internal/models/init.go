@@ -16,14 +16,13 @@ func normalizeBootstrapAdminUsername(username string) string {
 	return trimmed
 }
 
-// InitDefaultAdmin 初始化默认管理员账号
 func InitDefaultAdmin(username, password string) error {
 	bootstrapUsername := normalizeBootstrapAdminUsername(username)
+	bootstrapPassword := strings.TrimSpace(password)
 
 	var count int64
 	DB.Model(&Admin{}).Count(&count)
 
-	// 如果已有管理员，确保 bootstrap 默认管理员拥有超级管理员权限
 	if count > 0 {
 		if err := DB.Model(&Admin{}).Where("username = ?", bootstrapUsername).Update("is_super", true).Error; err != nil {
 			logger.Warnw("ensure_default_admin_super_failed", "error", err)
@@ -31,12 +30,13 @@ func InitDefaultAdmin(username, password string) error {
 		return nil
 	}
 
-	// 创建默认管理员
-	username = bootstrapUsername
-	if password == "" {
-		password = "admin123"
+	if bootstrapPassword == "" {
+		logger.Warnw("default_admin_skipped_without_password", "username", bootstrapUsername)
+		return nil
 	}
-	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+
+	username = bootstrapUsername
+	hash, err := bcrypt.GenerateFromPassword([]byte(bootstrapPassword), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
@@ -51,12 +51,7 @@ func InitDefaultAdmin(username, password string) error {
 		return err
 	}
 
-	if password == "admin123" {
-		logger.Warnw("default_admin_created_with_default_password", "username", username, "password", password)
-		logger.Warnw("default_admin_password_change_required", "username", username)
-	} else {
-		logger.Warnw("default_admin_created", "username", username, "password_hidden", true)
-	}
+	logger.Warnw("default_admin_created", "username", username, "password_hidden", true)
 
 	return nil
 }
