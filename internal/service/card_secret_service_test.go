@@ -338,6 +338,33 @@ func TestImportCardSecretCSVKeepsDuplicatesWhenDeduplicateDisabled(t *testing.T)
 	}
 }
 
+func TestParseCSVSecretsRejectsTooManyRecords(t *testing.T) {
+	var builder strings.Builder
+	builder.WriteString("secret\n")
+	for i := 0; i <= cardSecretCSVMaxSecretCount; i++ {
+		builder.WriteString(fmt.Sprintf("CSV-LIMIT-%05d\n", i))
+	}
+
+	_, err := parseCSVSecrets(strings.NewReader(builder.String()))
+	if err == nil {
+		t.Fatalf("expected too many records error")
+	}
+}
+
+func TestImportCardSecretCSVRejectsOversizedFileHeader(t *testing.T) {
+	fh := newCardSecretCSVFileHeader(t, "secret\nCSV-SIZE-001\n")
+	fh.Size = CardSecretCSVMaxBytes + 1
+
+	svc := NewCardSecretService(nil, nil, nil, nil)
+	_, _, err := svc.ImportCardSecretCSV(ImportCardSecretCSVInput{
+		ProductID: 1,
+		File:      fh,
+	})
+	if err != ErrCardSecretImportFailed {
+		t.Fatalf("expected ErrCardSecretImportFailed, got %v", err)
+	}
+}
+
 func TestCardSecretServiceSupportsBatchTargetOperations(t *testing.T) {
 	db := setupCardSecretServiceTestDB(t)
 

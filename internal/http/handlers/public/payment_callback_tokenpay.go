@@ -1,9 +1,7 @@
 package public
 
 import (
-	"bytes"
 	"encoding/json"
-	"io"
 	"strings"
 
 	"github.com/NexaCard/API/internal/constants"
@@ -15,11 +13,10 @@ import (
 func (h *Handler) HandleTokenPayCallback(c *gin.Context) bool {
 	log := shared.RequestLog(c)
 
-	body, err := io.ReadAll(c.Request.Body)
+	body, err := shared.ReadRequestBodyWithLimit(c, callbackBodyLimit)
 	if err != nil {
 		return false
 	}
-	c.Request.Body = io.NopCloser(bytes.NewBuffer(body))
 
 	// 轻量级特征检测：Signature + OutOrderId + Id（TokenOrderId）必须同时存在
 	var probe struct {

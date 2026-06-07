@@ -1,9 +1,8 @@
 package public
 
 import (
-	"bytes"
 	"encoding/json"
-	"io"
+	"errors"
 	"net/http"
 	"strings"
 
@@ -24,12 +23,16 @@ const (
 
 func (h *Handler) HandleWechatCallback(c *gin.Context) bool {
 	log := shared.RequestLog(c)
-	body, err := io.ReadAll(c.Request.Body)
+	body, err := shared.ReadRequestBodyWithLimit(c, callbackBodyLimit)
 	if err != nil {
+		if errors.Is(err, shared.ErrRequestBodyTooLarge) {
+			log.Warnw("wechat_callback_body_too_large")
+			c.AbortWithStatus(http.StatusRequestEntityTooLarge)
+			return true
+		}
 		log.Warnw("wechat_callback_body_read_failed", "error", err)
 		return false
 	}
-	c.Request.Body = io.NopCloser(bytes.NewBuffer(body))
 	if !isWechatCallbackRequest(c, body) {
 		log.Debugw("wechat_callback_not_matched")
 		return false

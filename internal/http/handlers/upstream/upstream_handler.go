@@ -3,7 +3,6 @@ package upstream
 import (
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -692,12 +691,11 @@ func (h *Handler) HandleCallback(c *gin.Context) {
 	// 读取 body 用于签名验证
 	var body []byte
 	if c.Request.Body != nil {
-		body, err = io.ReadAll(c.Request.Body)
+		body, err = shared.ReadRequestBodyWithLimit(c, 1<<20)
 		if err != nil {
 			c.JSON(http.StatusOK, gin.H{"ok": false, "message": "failed to read request body"})
 			return
 		}
-		c.Request.Body = io.NopCloser(&bodyBuf{data: body})
 	}
 
 	// 解密 api_secret 并验证签名
@@ -766,21 +764,6 @@ func (h *Handler) HandleCallback(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"ok": true, "message": "received"})
-}
-
-// bodyBuf 用于重置 body
-type bodyBuf struct {
-	data   []byte
-	offset int
-}
-
-func (b *bodyBuf) Read(p []byte) (n int, err error) {
-	if b.offset >= len(b.data) {
-		return 0, io.EOF
-	}
-	n = copy(p, b.data[b.offset:])
-	b.offset += n
-	return n, nil
 }
 
 // mapCallbackStatus 将上游订单状态映射为回调处理状态

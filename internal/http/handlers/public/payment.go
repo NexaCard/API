@@ -40,7 +40,10 @@ type StripeWebhookQuery struct {
 	ChannelID uint `form:"channel_id"`
 }
 
-const callbackLogValueLimit = 4096
+const (
+	callbackBodyLimit     = 1 << 20
+	callbackLogValueLimit = 4096
+)
 
 // CreatePayment 创建支付单
 func (h *Handler) CreatePayment(c *gin.Context) {

@@ -2,6 +2,7 @@ package admin
 
 import (
 	"errors"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -141,6 +142,9 @@ func (h *Handler) ImportCardSecretCSV(c *gin.Context) {
 	adminID, ok := shared.GetAdminID(c)
 	if !ok {
 		return
+	}
+	if c.Request != nil && c.Request.Body != nil {
+		c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, service.CardSecretCSVMaxBytes+adminUploadMultipartOverhead)
 	}
 	productID, err := shared.ParseQueryUint(c.PostForm("product_id"), true)
 	if err != nil {

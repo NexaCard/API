@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"mime"
 	"mime/multipart"
@@ -20,6 +21,8 @@ type rewriteTelegramTransport struct {
 	baseURL string
 }
 
+type failingTelegramTransport struct{}
+
 func (t rewriteTelegramTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	target := strings.TrimRight(t.baseURL, "/") + req.URL.Path
 	rewritten, err := http.NewRequestWithContext(req.Context(), req.Method, target, req.Body)
@@ -28,6 +31,10 @@ func (t rewriteTelegramTransport) RoundTrip(req *http.Request) (*http.Response, 
 	}
 	rewritten.Header = req.Header.Clone()
 	return http.DefaultTransport.RoundTrip(rewritten)
+}
+
+func (failingTelegramTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	return nil, errors.New("dial tcp " + req.URL.String())
 }
 
 func TestTelegramNotifyServiceSendWithBotTokenUploadsLocalAttachment(t *testing.T) {
@@ -246,5 +253,21 @@ func TestTelegramNotifyServiceSendWithBotTokenSendsRemotePhoto(t *testing.T) {
 	})
 	if err != nil {
 		t.Fatalf("send with remote photo failed: %v", err)
+	}
+}
+
+func TestTelegramNotifyServiceDoesNotLeakBotTokenOnRequestError(t *testing.T) {
+	svc := NewTelegramNotifyService(nil, config.TelegramAuthConfig{})
+	svc.httpClient = &http.Client{Transport: failingTelegramTransport{}}
+
+	err := svc.SendWithBotToken(context.Background(), "123456:secret-token", TelegramSendOptions{
+		ChatID:  "10001",
+		Message: "hello",
+	})
+	if err == nil {
+		t.Fatalf("expected send error")
+	}
+	if strings.Contains(err.Error(), "123456:secret-token") || strings.Contains(err.Error(), "/bot") {
+		t.Fatalf("error should not leak bot token or request path: %v", err)
 	}
 }

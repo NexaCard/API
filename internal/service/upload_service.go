@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"image"
 	"io"
+	"mime"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -31,6 +32,20 @@ var allowedUploadScenes = map[string]struct{}{
 	"category": {},
 	"telegram": {},
 }
+
+var telegramUploadAllowedExtensions = map[string]struct{}{
+	".jpg":  {},
+	".jpeg": {},
+	".png":  {},
+	".gif":  {},
+	".webp": {},
+	".pdf":  {},
+	".txt":  {},
+	".csv":  {},
+	".zip":  {},
+}
+
+const defaultUploadMaxSize = 10 << 20
 
 // UploadService 文件上传服务
 type UploadService struct {
@@ -81,17 +96,26 @@ func (s *UploadService) SaveFile(file *multipart.FileHeader, scene string) (stri
 
 // SaveFileWithMeta 保存上传的文件并返回完整元数据
 func (s *UploadService) SaveFileWithMeta(file *multipart.FileHeader, scene string) (*UploadResult, error) {
+	if file == nil {
+		return nil, newUploadValidationError("file is required")
+	}
 	normalizedScene := normalizeUploadScene(scene)
+	uploadCfg := s.uploadConfig()
+	maxSize := s.maxUploadSize()
 
 	// 验证文件大小
-	if file.Size > s.cfg.Upload.MaxSize {
-		return nil, newUploadValidationError("文件大小超过限制（最大 %d MB）", s.cfg.Upload.MaxSize/1024/1024)
+	if file.Size > maxSize {
+		return nil, newUploadValidationError("文件大小超过限制（最大 %d MB）", maxSize/1024/1024)
 	}
 
 	// 获取文件扩展名
 	ext := strings.ToLower(filepath.Ext(file.Filename))
-	if normalizedScene != "telegram" && len(s.cfg.Upload.AllowedExtensions) > 0 {
-		if ext == "" || !isAllowedExtension(ext, s.cfg.Upload.AllowedExtensions) {
+	if normalizedScene == "telegram" {
+		if !isAllowedTelegramUploadExtension(ext) {
+			return nil, newUploadValidationError("Telegram 附件类型不被允许: %s", ext)
+		}
+	} else if len(uploadCfg.AllowedExtensions) > 0 {
+		if ext == "" || !isAllowedExtension(ext, uploadCfg.AllowedExtensions) {
 			return nil, newUploadValidationError("文件扩展名不被允许: %s", ext)
 		}
 	}
@@ -105,7 +129,7 @@ func (s *UploadService) SaveFileWithMeta(file *multipart.FileHeader, scene strin
 
 	// 读取文件头部识别 MIME 类型
 	buffer := make([]byte, 512)
-	_, err = src.Read(buffer)
+	bytesRead, err := src.Read(buffer)
 	if err != nil && err != io.EOF {
 		return nil, err
 	}
@@ -113,14 +137,19 @@ func (s *UploadService) SaveFileWithMeta(file *multipart.FileHeader, scene strin
 		return nil, err
 	}
 
-	contentType := http.DetectContentType(buffer)
+	header := buffer[:bytesRead]
+	contentType := http.DetectContentType(header)
 	// http.DetectContentType 无法识别 SVG，需根据扩展名和内容特征补充判断
-	if ext == ".svg" && isSVGContent(buffer) {
+	if ext == ".svg" && isSVGContent(header) {
 		contentType = "image/svg+xml"
 	}
-	if normalizedScene != "telegram" && len(s.cfg.Upload.AllowedTypes) > 0 {
+	if normalizedScene == "telegram" {
+		if !isAllowedTelegramUploadContent(ext, contentType) {
+			return nil, newUploadValidationError("Telegram 附件类型不被允许: %s", contentType)
+		}
+	} else if len(uploadCfg.AllowedTypes) > 0 {
 		allowed := false
-		for _, t := range s.cfg.Upload.AllowedTypes {
+		for _, t := range uploadCfg.AllowedTypes {
 			if strings.EqualFold(contentType, t) {
 				allowed = true
 				break
@@ -142,11 +171,11 @@ func (s *UploadService) SaveFileWithMeta(file *multipart.FileHeader, scene strin
 		}
 		imgWidth = width
 		imgHeight = height
-		if s.cfg.Upload.MaxWidth > 0 && width > s.cfg.Upload.MaxWidth {
-			return nil, newUploadValidationError("图片宽度超过限制（最大 %d）", s.cfg.Upload.MaxWidth)
+		if uploadCfg.MaxWidth > 0 && width > uploadCfg.MaxWidth {
+			return nil, newUploadValidationError("图片宽度超过限制（最大 %d）", uploadCfg.MaxWidth)
 		}
-		if s.cfg.Upload.MaxHeight > 0 && height > s.cfg.Upload.MaxHeight {
-			return nil, newUploadValidationError("图片高度超过限制（最大 %d）", s.cfg.Upload.MaxHeight)
+		if uploadCfg.MaxHeight > 0 && height > uploadCfg.MaxHeight {
+			return nil, newUploadValidationError("图片高度超过限制（最大 %d）", uploadCfg.MaxHeight)
 		}
 	}
 
@@ -155,9 +184,12 @@ func (s *UploadService) SaveFileWithMeta(file *multipart.FileHeader, scene strin
 		if _, err := src.Seek(0, 0); err != nil {
 			return nil, err
 		}
-		svgData, err := io.ReadAll(src)
+		svgData, err := io.ReadAll(io.LimitReader(src, maxSize+1))
 		if err != nil {
 			return nil, err
+		}
+		if int64(len(svgData)) > maxSize {
+			return nil, newUploadValidationError("文件大小超过限制（最大 %d MB）", maxSize/1024/1024)
 		}
 		if err := validateSVGSafety(svgData); err != nil {
 			return nil, newUploadValidationError("%s", err.Error())
@@ -187,18 +219,31 @@ func (s *UploadService) SaveFileWithMeta(file *multipart.FileHeader, scene strin
 	if err != nil {
 		return nil, err
 	}
-	defer dst.Close()
+	cleanup := true
+	defer func() {
+		_ = dst.Close()
+		if cleanup {
+			_ = os.Remove(savePath)
+		}
+	}()
 
-	_, err = io.Copy(dst, src)
+	written, err := io.Copy(dst, io.LimitReader(src, maxSize+1))
 	if err != nil {
 		return nil, err
 	}
+	if written > maxSize {
+		return nil, newUploadValidationError("文件大小超过限制（最大 %d MB）", maxSize/1024/1024)
+	}
+	if err := dst.Close(); err != nil {
+		return nil, err
+	}
+	cleanup = false
 
 	return &UploadResult{
 		URL:      fmt.Sprintf("/uploads/%s/%s/%s/%s", normalizedScene, year, month, filename),
 		Filename: file.Filename,
 		MimeType: contentType,
-		Size:     file.Size,
+		Size:     written,
 		Width:    imgWidth,
 		Height:   imgHeight,
 	}, nil
@@ -215,6 +260,21 @@ func normalizeUploadScene(raw string) string {
 	return "common"
 }
 
+func (s *UploadService) maxUploadSize() int64 {
+	uploadCfg := s.uploadConfig()
+	if uploadCfg.MaxSize <= 0 {
+		return defaultUploadMaxSize
+	}
+	return uploadCfg.MaxSize
+}
+
+func (s *UploadService) uploadConfig() config.UploadConfig {
+	if s == nil || s.cfg == nil {
+		return config.UploadConfig{}
+	}
+	return s.cfg.Upload
+}
+
 func isAllowedExtension(ext string, allowed []string) bool {
 	for _, allowedExt := range allowed {
 		normalized := strings.ToLower(strings.TrimSpace(allowedExt))
@@ -229,6 +289,46 @@ func isAllowedExtension(ext string, allowed []string) bool {
 		}
 	}
 	return false
+}
+
+func isAllowedTelegramUploadExtension(ext string) bool {
+	ext = strings.ToLower(strings.TrimSpace(ext))
+	if ext == "" {
+		return false
+	}
+	_, ok := telegramUploadAllowedExtensions[ext]
+	return ok
+}
+
+func isAllowedTelegramUploadContent(ext, contentType string) bool {
+	if !isAllowedTelegramUploadExtension(ext) {
+		return false
+	}
+	normalizedType := strings.ToLower(strings.TrimSpace(contentType))
+	switch ext {
+	case ".jpg", ".jpeg":
+		return normalizedType == "image/jpeg"
+	case ".png":
+		return normalizedType == "image/png"
+	case ".gif":
+		return normalizedType == "image/gif"
+	case ".webp":
+		return normalizedType == "image/webp"
+	case ".pdf":
+		return normalizedType == "application/pdf"
+	case ".zip":
+		return normalizedType == "application/zip" ||
+			normalizedType == "application/x-zip-compressed" ||
+			normalizedType == "application/octet-stream"
+	case ".txt", ".csv":
+		return normalizedType == "text/plain; charset=utf-8" ||
+			normalizedType == "text/plain" ||
+			normalizedType == "text/csv" ||
+			normalizedType == "application/octet-stream"
+	default:
+		detected := strings.ToLower(strings.TrimSpace(mime.TypeByExtension(ext)))
+		return detected != "" && strings.HasPrefix(normalizedType, strings.Split(detected, ";")[0])
+	}
 }
 
 func decodeImageDimensions(src io.ReadSeeker, contentType string) (int, int, error) {

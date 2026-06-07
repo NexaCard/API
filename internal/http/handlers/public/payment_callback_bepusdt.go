@@ -1,9 +1,7 @@
 package public
 
 import (
-	"bytes"
 	"encoding/json"
-	"io"
 	"strings"
 
 	"github.com/NexaCard/API/internal/constants"
@@ -17,12 +15,10 @@ func (h *Handler) HandleBepusdtCallback(c *gin.Context) bool {
 	log := shared.RequestLog(c)
 
 	// 读取请求体
-	body, err := io.ReadAll(c.Request.Body)
+	body, err := shared.ReadRequestBodyWithLimit(c, callbackBodyLimit)
 	if err != nil {
 		return false
 	}
-	// 恢复请求体供后续使用
-	c.Request.Body = io.NopCloser(bytes.NewBuffer(body))
 
 	// 轻量级特征检测：trade_id + order_id 必须同时存在（BEpusdt 回调特征，无 pid）
 	var probe struct {

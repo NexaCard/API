@@ -1,9 +1,7 @@
 package public
 
 import (
-	"bytes"
 	"fmt"
-	"io"
 	"net/url"
 	"strings"
 
@@ -17,11 +15,10 @@ import (
 func (h *Handler) HandleOkpayCallback(c *gin.Context) bool {
 	log := shared.RequestLog(c)
 
-	body, err := io.ReadAll(c.Request.Body)
+	body, err := shared.ReadRequestBodyWithLimit(c, callbackBodyLimit)
 	if err != nil {
 		return false
 	}
-	c.Request.Body = io.NopCloser(bytes.NewBuffer(body))
 
 	// 轻量级特征检测：从 form 或 JSON body 中探测 sign + data[unique_id] + data[order_id]
 	// okpay callback 是 form POST（application/x-www-form-urlencoded）

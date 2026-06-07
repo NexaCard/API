@@ -36,7 +36,7 @@ func TestUploadServiceSaveFileAllowsArchiveForTelegramScene(t *testing.T) {
 	if err != nil {
 		t.Fatalf("create form file failed: %v", err)
 	}
-	if _, err := part.Write([]byte("fake zip content")); err != nil {
+	if _, err := part.Write([]byte("PK\x03\x04fake zip content")); err != nil {
 		t.Fatalf("write form content failed: %v", err)
 	}
 	if err := writer.Close(); err != nil {
@@ -62,6 +62,122 @@ func TestUploadServiceSaveFileAllowsArchiveForTelegramScene(t *testing.T) {
 	}
 	if _, err := os.Stat(filepath.Join(tempDir, strings.TrimPrefix(savedPath, "/"))); err != nil {
 		t.Fatalf("saved file not found: %v", err)
+	}
+}
+
+func TestUploadServiceSaveFileRejectsUnsafeTelegramAttachments(t *testing.T) {
+	originalWD, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("getwd failed: %v", err)
+	}
+	tempDir := t.TempDir()
+	if err := os.Chdir(tempDir); err != nil {
+		t.Fatalf("chdir temp dir failed: %v", err)
+	}
+	defer func() {
+		_ = os.Chdir(originalWD)
+	}()
+
+	cfg := &config.Config{}
+	cfg.Upload.MaxSize = 10 * 1024 * 1024
+	svc := NewUploadService(cfg)
+
+	tests := []struct {
+		name     string
+		filename string
+		content  []byte
+	}{
+		{
+			name:     "html",
+			filename: "payload.html",
+			content:  []byte("<html><script>alert(1)</script></html>"),
+		},
+		{
+			name:     "javascript",
+			filename: "payload.js",
+			content:  []byte("alert(1)"),
+		},
+		{
+			name:     "svg",
+			filename: "payload.svg",
+			content:  []byte(`<svg xmlns="http://www.w3.org/2000/svg"></svg>`),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fh := createMultipartFile(t, tt.filename, tt.content)
+			_, err := svc.SaveFile(fh, "telegram")
+			if err == nil {
+				t.Fatalf("expected unsafe telegram attachment to be rejected")
+			}
+		})
+	}
+}
+
+func TestUploadServiceSaveFileRejectsTelegramTextWithHTMLContent(t *testing.T) {
+	originalWD, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("getwd failed: %v", err)
+	}
+	tempDir := t.TempDir()
+	if err := os.Chdir(tempDir); err != nil {
+		t.Fatalf("chdir temp dir failed: %v", err)
+	}
+	defer func() {
+		_ = os.Chdir(originalWD)
+	}()
+
+	cfg := &config.Config{}
+	cfg.Upload.MaxSize = 10 * 1024 * 1024
+	svc := NewUploadService(cfg)
+
+	fh := createMultipartFile(t, "payload.txt", []byte("<html><script>alert(1)</script></html>"))
+	_, err = svc.SaveFile(fh, "telegram")
+	if err == nil {
+		t.Fatalf("expected text file with html content to be rejected")
+	}
+}
+
+func TestUploadServiceSaveFileRejectsActualOversizedContent(t *testing.T) {
+	originalWD, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("getwd failed: %v", err)
+	}
+	tempDir := t.TempDir()
+	if err := os.Chdir(tempDir); err != nil {
+		t.Fatalf("chdir temp dir failed: %v", err)
+	}
+	defer func() {
+		_ = os.Chdir(originalWD)
+	}()
+
+	cfg := &config.Config{}
+	cfg.Upload.MaxSize = 4
+	cfg.Upload.AllowedTypes = []string{"text/plain; charset=utf-8"}
+	cfg.Upload.AllowedExtensions = []string{".txt"}
+	svc := NewUploadService(cfg)
+
+	fh := createMultipartFile(t, "oversized.txt", []byte("hello"))
+	fh.Size = cfg.Upload.MaxSize
+	_, err = svc.SaveFile(fh, "common")
+	if err == nil {
+		t.Fatalf("expected oversized file to be rejected")
+	}
+	var files []string
+	walkErr := filepath.Walk(filepath.Join(tempDir, "uploads"), func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info != nil && !info.IsDir() {
+			files = append(files, path)
+		}
+		return nil
+	})
+	if walkErr != nil && !os.IsNotExist(walkErr) {
+		t.Fatalf("walk uploads failed: %v", walkErr)
+	}
+	if len(files) > 0 {
+		t.Fatalf("oversized upload should not leave files behind: %v", files)
 	}
 }
 

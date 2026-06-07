@@ -23,6 +23,8 @@ type telegramSendMessageResponse struct {
 	Description string `json:"description"`
 }
 
+const telegramResponseBodyLimit = 64 << 10
+
 // TelegramSendOptions Telegram 发送参数。
 type TelegramSendOptions struct {
 	ChatID                string
@@ -178,13 +180,13 @@ func (s *TelegramNotifyService) sendJSONRequest(ctx context.Context, botToken, m
 func (s *TelegramNotifyService) doRequest(req *http.Request) error {
 	resp, err := s.httpClient.Do(req)
 	if err != nil {
-		return fmt.Errorf("%w: %v", ErrNotificationSendFailed, err)
+		return fmt.Errorf("%w: telegram request failed", ErrNotificationSendFailed)
 	}
 	defer resp.Body.Close()
 
-	body, err := io.ReadAll(resp.Body)
+	body, err := io.ReadAll(io.LimitReader(resp.Body, telegramResponseBodyLimit))
 	if err != nil {
-		return fmt.Errorf("%w: %v", ErrNotificationSendFailed, err)
+		return fmt.Errorf("%w: read telegram response failed", ErrNotificationSendFailed)
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return fmt.Errorf("%w: telegram status=%d body=%s", ErrNotificationSendFailed, resp.StatusCode, strings.TrimSpace(string(body)))

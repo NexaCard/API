@@ -27,6 +27,11 @@ type CardSecretService struct {
 	productSKURepo repository.ProductSKURepository
 }
 
+const (
+	CardSecretCSVMaxBytes       int64 = 2 << 20
+	cardSecretCSVMaxSecretCount       = 10000
+)
+
 // NewCardSecretService 创建卡密库存服务
 func NewCardSecretService(secretRepo repository.CardSecretRepository, batchRepo repository.CardSecretBatchRepository, productRepo repository.ProductRepository, productSKURepo repository.ProductSKURepository) *CardSecretService {
 	return &CardSecretService{
@@ -150,6 +155,9 @@ func (s *CardSecretService) ImportCardSecretCSV(input ImportCardSecretCSVInput) 
 	if input.ProductID == 0 || input.File == nil {
 		return nil, 0, ErrCardSecretInvalid
 	}
+	if input.File.Size > CardSecretCSVMaxBytes {
+		return nil, 0, ErrCardSecretImportFailed
+	}
 
 	file, err := input.File.Open()
 	if err != nil {
@@ -157,8 +165,9 @@ func (s *CardSecretService) ImportCardSecretCSV(input ImportCardSecretCSVInput) 
 	}
 	defer file.Close()
 
-	secrets, err := parseCSVSecrets(file)
-	if err != nil {
+	limited := &io.LimitedReader{R: file, N: CardSecretCSVMaxBytes + 1}
+	secrets, err := parseCSVSecrets(limited)
+	if err != nil || limited.N <= 0 {
 		return nil, 0, ErrCardSecretImportFailed
 	}
 	return s.CreateCardSecretBatch(CreateCardSecretBatchInput{
@@ -787,6 +796,9 @@ func parseCSVSecrets(reader io.Reader) ([]string, error) {
 			continue
 		}
 		secrets = append(secrets, secret)
+		if len(secrets) > cardSecretCSVMaxSecretCount {
+			return nil, fmt.Errorf("card secret csv exceeds max records")
+		}
 	}
 	return secrets, nil
 }

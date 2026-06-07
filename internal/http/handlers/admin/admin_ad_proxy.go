@@ -2,9 +2,9 @@ package admin
 
 import (
 	"encoding/json"
-	"io"
 	"net/http"
 
+	"github.com/NexaCard/API/internal/http/handlers/shared"
 	"github.com/NexaCard/API/internal/http/response"
 	"github.com/gin-gonic/gin"
 )
@@ -36,7 +36,7 @@ func (h *Handler) GetAdRender(c *gin.Context) {
 
 // PostAdImpression 代理广告曝光上报到 ad-system
 func (h *Handler) PostAdImpression(c *gin.Context) {
-	body, err := io.ReadAll(c.Request.Body)
+	body, err := shared.ReadRequestBodyWithLimit(c, 256<<10)
 	if err != nil {
 		response.Error(c, http.StatusBadRequest, "invalid request body")
 		return

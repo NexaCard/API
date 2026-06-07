@@ -1,6 +1,8 @@
 package admin
 
 import (
+	"net/http"
+
 	"github.com/NexaCard/API/internal/http/handlers/shared"
 	"github.com/NexaCard/API/internal/http/response"
 	"github.com/NexaCard/API/internal/logger"
@@ -11,8 +13,16 @@ import (
 
 // ====================  文件上传  ====================
 
+const (
+	defaultAdminUploadMaxSize    = 10 << 20
+	adminUploadMultipartOverhead = 1 << 20
+)
+
 // UploadFile 文件上传
 func (h *Handler) UploadFile(c *gin.Context) {
+	if c.Request != nil && c.Request.Body != nil {
+		c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, h.uploadBodyLimit())
+	}
 	file, err := c.FormFile("file")
 	if err != nil {
 		shared.RespondError(c, response.CodeBadRequest, "error.file_missing", nil)
@@ -46,4 +56,12 @@ func (h *Handler) UploadFile(c *gin.Context) {
 		"size":     result.Size,
 		"media_id": mediaID,
 	})
+}
+
+func (h *Handler) uploadBodyLimit() int64 {
+	maxSize := int64(defaultAdminUploadMaxSize)
+	if h != nil && h.Container != nil && h.Config != nil && h.Config.Upload.MaxSize > 0 {
+		maxSize = h.Config.Upload.MaxSize
+	}
+	return maxSize + adminUploadMultipartOverhead
 }

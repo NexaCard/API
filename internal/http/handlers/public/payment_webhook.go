@@ -1,7 +1,8 @@
 package public
 
 import (
-	"io"
+	"errors"
+	"net/http"
 	"strings"
 
 	"github.com/NexaCard/API/internal/constants"
@@ -22,8 +23,13 @@ func (h *Handler) PaypalWebhook(c *gin.Context) {
 		shared.RespondError(c, response.CodeBadRequest, "error.bad_request", err)
 		return
 	}
-	body, err := io.ReadAll(c.Request.Body)
+	body, err := shared.ReadRequestBodyWithLimit(c, callbackBodyLimit)
 	if err != nil {
+		if errors.Is(err, shared.ErrRequestBodyTooLarge) {
+			log.Warnw("paypal_webhook_body_too_large", "channel_id", query.ChannelID)
+			c.AbortWithStatus(http.StatusRequestEntityTooLarge)
+			return
+		}
 		log.Warnw("paypal_webhook_body_read_failed", "channel_id", query.ChannelID, "error", err)
 		shared.RespondError(c, response.CodeBadRequest, "error.bad_request", err)
 		return
@@ -102,8 +108,13 @@ func (h *Handler) StripeWebhook(c *gin.Context) {
 	var query StripeWebhookQuery
 	_ = c.ShouldBindQuery(&query)
 
-	body, err := io.ReadAll(c.Request.Body)
+	body, err := shared.ReadRequestBodyWithLimit(c, callbackBodyLimit)
 	if err != nil {
+		if errors.Is(err, shared.ErrRequestBodyTooLarge) {
+			log.Warnw("stripe_webhook_body_too_large", "channel_id", query.ChannelID)
+			c.AbortWithStatus(http.StatusRequestEntityTooLarge)
+			return
+		}
 		log.Warnw("stripe_webhook_body_read_failed", "channel_id", query.ChannelID, "error", err)
 		shared.RespondError(c, response.CodeBadRequest, "error.bad_request", err)
 		return
