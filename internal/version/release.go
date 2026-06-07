@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -18,8 +19,10 @@ const (
 	// repoName GitHub 仓库名称
 	repoName = "API"
 
-	githubAPIBaseURL = "https://api.github.com"
-	releaseUserAgent = "nexacard-update-checker"
+	githubAPIBaseURL    = "https://api.github.com"
+	githubWebBaseURL    = "https://github.com"
+	releaseUserAgent    = "nexacard-update-checker"
+	maxReleaseNotesRune = 20000
 )
 
 // releasePayload GitHub Releases API 响应中本检测器关心的字段
@@ -75,6 +78,9 @@ func CheckLatestRelease(ctx context.Context) (*CheckResult, error) {
 	if resp.StatusCode == http.StatusForbidden && resp.Header.Get("X-RateLimit-Remaining") == "0" {
 		return nil, ErrRateLimited
 	}
+	if resp.StatusCode == http.StatusTooManyRequests {
+		return nil, ErrRateLimited
+	}
 	if resp.StatusCode == http.StatusNotFound {
 		return nil, fmt.Errorf("github release not found for %s/%s", repoOwner, repoName)
 	}
@@ -89,22 +95,73 @@ func CheckLatestRelease(ctx context.Context) (*CheckResult, error) {
 
 	current := strings.TrimSpace(Version)
 	latest := strings.TrimSpace(payload.TagName)
+	if latest == "" {
+		return nil, errors.New("github release tag is empty")
+	}
 	hasUpdate, _ := IsNewerVersion(latest, current)
 
 	result := &CheckResult{
 		CurrentVersion: current,
 		LatestVersion:  latest,
 		HasUpdate:      hasUpdate,
-		ReleaseURL:     payload.HTMLURL,
+		ReleaseURL:     normalizeReleaseURL(payload.HTMLURL),
 		ReleaseName:    payload.Name,
-		ReleaseNotes:   payload.Body,
-		Source:         fmt.Sprintf("https://github.com/%s/%s/releases", repoOwner, repoName),
+		ReleaseNotes:   normalizeReleaseNotes(payload.Body),
+		Source:         releaseSourceURL(),
 	}
 	if !payload.PublishedAt.IsZero() {
 		t := payload.PublishedAt
 		result.PublishedAt = &t
 	}
 	return result, nil
+}
+
+func releaseSourceURL() string {
+	return fmt.Sprintf("%s/%s/%s/releases", githubWebBaseURL, repoOwner, repoName)
+}
+
+func normalizeReleaseURL(raw string) string {
+	fallback := releaseSourceURL()
+	value := strings.TrimSpace(raw)
+	if value == "" {
+		return fallback
+	}
+	parsed, err := url.Parse(value)
+	if err != nil || parsed == nil {
+		return fallback
+	}
+	if parsed.Scheme != "https" || !strings.EqualFold(parsed.Hostname(), "github.com") {
+		return fallback
+	}
+	parts := strings.Split(strings.Trim(parsed.Path, "/"), "/")
+	if len(parts) != 3 && len(parts) != 5 {
+		return fallback
+	}
+	if !strings.EqualFold(parts[0], repoOwner) || !strings.EqualFold(parts[1], repoName) || parts[2] != "releases" {
+		return fallback
+	}
+	if len(parts) == 5 && (parts[3] != "tag" || strings.TrimSpace(parts[4]) == "") {
+		return fallback
+	}
+
+	parsed.Scheme = "https"
+	parsed.Host = "github.com"
+	parsed.User = nil
+	parsed.RawQuery = ""
+	parsed.Fragment = ""
+	return parsed.String()
+}
+
+func normalizeReleaseNotes(raw string) string {
+	notes := strings.TrimSpace(raw)
+	if notes == "" {
+		return ""
+	}
+	runes := []rune(notes)
+	if len(runes) <= maxReleaseNotesRune {
+		return notes
+	}
+	return strings.TrimSpace(string(runes[:maxReleaseNotesRune])) + "\n\n..."
 }
 
 // IsNewerVersion 判断 latest 是否比 current 更新。返回 (true, nil) 表示需要更新；
