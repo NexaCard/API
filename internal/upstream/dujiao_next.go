@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -15,6 +16,7 @@ import (
 
 	"github.com/NexaCard/API/internal/logger"
 	"github.com/NexaCard/API/internal/models"
+	"github.com/NexaCard/API/internal/urlguard"
 
 	"github.com/google/uuid"
 )
@@ -51,6 +53,8 @@ type DujiaoNextAdapter struct {
 	uploadsDir string
 	client     *http.Client
 }
+
+const maxUpstreamImageBytes int64 = 10 << 20
 
 // NewDujiaoNextAdapter 创建 NexaCard OpenAPI 兼容适配器
 func NewDujiaoNextAdapter(conn *models.SiteConnection, uploadsDir string) *DujiaoNextAdapter {
@@ -172,10 +176,9 @@ func (a *DujiaoNextAdapter) CancelOrder(ctx context.Context, orderID uint) error
 
 // DownloadImage 下载图片到本地
 func (a *DujiaoNextAdapter) DownloadImage(ctx context.Context, imageURL string) (string, error) {
-	// 相对路径转绝对 URL
-	fullURL := imageURL
-	if strings.HasPrefix(imageURL, "/") {
-		fullURL = a.baseURL + imageURL
+	fullURL, extSource, err := a.resolveImageDownloadURL(imageURL)
+	if err != nil {
+		return "", err
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fullURL, nil)
@@ -183,7 +186,10 @@ func (a *DujiaoNextAdapter) DownloadImage(ctx context.Context, imageURL string) 
 		return "", fmt.Errorf("create download request: %w", err)
 	}
 
-	resp, err := a.client.Do(req)
+	imageClient := *a.client
+	imageClient.CheckRedirect = sameAuthorityRedirectPolicy(fullURL)
+
+	resp, err := imageClient.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("download image: %w", err)
 	}
@@ -192,9 +198,12 @@ func (a *DujiaoNextAdapter) DownloadImage(ctx context.Context, imageURL string) 
 	if resp.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("download image: status %d", resp.StatusCode)
 	}
+	if resp.ContentLength > maxUpstreamImageBytes {
+		return "", fmt.Errorf("download image: content length exceeds %d bytes", maxUpstreamImageBytes)
+	}
 
 	// 确定文件扩展名
-	ext := filepath.Ext(imageURL)
+	ext := filepath.Ext(extSource)
 	if ext == "" || len(ext) > 6 {
 		ext = ".jpg"
 	}
@@ -216,12 +225,118 @@ func (a *DujiaoNextAdapter) DownloadImage(ctx context.Context, imageURL string) 
 	}
 	defer f.Close()
 
-	if _, err := io.Copy(f, resp.Body); err != nil {
+	written, err := io.Copy(f, io.LimitReader(resp.Body, maxUpstreamImageBytes+1))
+	if err != nil {
+		_ = f.Close()
+		_ = os.Remove(filePath)
 		return "", fmt.Errorf("write file: %w", err)
+	}
+	if written > maxUpstreamImageBytes {
+		_ = f.Close()
+		_ = os.Remove(filePath)
+		return "", fmt.Errorf("download image: body exceeds %d bytes", maxUpstreamImageBytes)
 	}
 
 	// 返回相对路径
 	return "/uploads/upstream/" + filename, nil
+}
+
+func (a *DujiaoNextAdapter) resolveImageDownloadURL(imageURL string) (string, string, error) {
+	rawImageURL := strings.TrimSpace(imageURL)
+	if rawImageURL == "" {
+		return "", "", fmt.Errorf("image url is required")
+	}
+
+	baseURL, err := urlguard.NormalizeServiceBaseURL(a.baseURL)
+	if err != nil {
+		return "", "", fmt.Errorf("invalid upstream base url: %w", err)
+	}
+	base, err := url.Parse(baseURL)
+	if err != nil {
+		return "", "", fmt.Errorf("parse upstream base url: %w", err)
+	}
+
+	image, err := url.Parse(rawImageURL)
+	if err != nil {
+		return "", "", fmt.Errorf("invalid image url: %w", err)
+	}
+	if !image.IsAbs() {
+		if !strings.HasPrefix(rawImageURL, "/") || strings.HasPrefix(rawImageURL, "//") {
+			return "", "", fmt.Errorf("image url must be absolute or root-relative")
+		}
+		image = base.ResolveReference(image)
+	}
+
+	normalizedImageURL, err := urlguard.NormalizeHTTPURL(image.String(), urlguard.HTTPURLOptions{
+		AllowPrivateHosts: true,
+	})
+	if err != nil {
+		return "", "", fmt.Errorf("invalid image download url: %w", err)
+	}
+	normalizedImage, err := url.Parse(normalizedImageURL)
+	if err != nil {
+		return "", "", fmt.Errorf("parse image download url: %w", err)
+	}
+	if !sameURLAuthority(base, normalizedImage) {
+		return "", "", fmt.Errorf("image download url must use upstream host")
+	}
+
+	return normalizedImageURL, normalizedImage.Path, nil
+}
+
+func sameURLAuthority(a, b *url.URL) bool {
+	if a == nil || b == nil {
+		return false
+	}
+	return strings.EqualFold(a.Scheme, b.Scheme) &&
+		strings.EqualFold(a.Hostname(), b.Hostname()) &&
+		canonicalURLPort(a) == canonicalURLPort(b)
+}
+
+func canonicalURLPort(u *url.URL) string {
+	if u == nil {
+		return ""
+	}
+	if port := u.Port(); port != "" {
+		return port
+	}
+	switch strings.ToLower(u.Scheme) {
+	case "http":
+		return "80"
+	case "https":
+		return "443"
+	default:
+		return ""
+	}
+}
+
+func sameAuthorityRedirectPolicy(sourceURL string) func(req *http.Request, via []*http.Request) error {
+	source, sourceErr := url.Parse(sourceURL)
+	return func(req *http.Request, via []*http.Request) error {
+		if sourceErr != nil {
+			return sourceErr
+		}
+		if len(via) >= 5 {
+			return fmt.Errorf("stopped after %d redirects", len(via))
+		}
+		if req == nil || req.URL == nil {
+			return fmt.Errorf("invalid redirect url")
+		}
+		normalizedURL, err := urlguard.NormalizeHTTPURL(req.URL.String(), urlguard.HTTPURLOptions{
+			AllowPrivateHosts: true,
+		})
+		if err != nil {
+			return fmt.Errorf("invalid redirect url: %w", err)
+		}
+		target, err := url.Parse(normalizedURL)
+		if err != nil {
+			return fmt.Errorf("parse redirect url: %w", err)
+		}
+		if !sameURLAuthority(source, target) {
+			return fmt.Errorf("redirect target must use upstream host")
+		}
+		return nil
+	}
 }
 
 // doRequest 发送签名请求
@@ -244,7 +359,11 @@ func (a *DujiaoNextAdapter) doRequest(ctx context.Context, method, path string, 
 	timestamp := time.Now().Unix()
 	signature := Sign(a.apiSecret, method, signPath, timestamp, bodyBytes)
 
-	url := a.baseURL + path
+	baseURL, err := urlguard.NormalizeServiceBaseURL(a.baseURL)
+	if err != nil {
+		return fmt.Errorf("invalid upstream base url: %w", err)
+	}
+	url := baseURL + path
 	var bodyReader io.Reader
 	if bodyBytes != nil {
 		bodyReader = bytes.NewReader(bodyBytes)
@@ -262,7 +381,10 @@ func (a *DujiaoNextAdapter) doRequest(ctx context.Context, method, path string, 
 		req.Header.Set("Content-Type", "application/json")
 	}
 
-	resp, err := a.client.Do(req)
+	requestClient := *a.client
+	requestClient.CheckRedirect = sameAuthorityRedirectPolicy(url)
+
+	resp, err := requestClient.Do(req)
 	if err != nil {
 		return fmt.Errorf("send request: %w", err)
 	}

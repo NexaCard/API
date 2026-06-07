@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/NexaCard/API/internal/models"
 	"github.com/NexaCard/API/internal/repository"
 	"github.com/NexaCard/API/internal/upstream"
+	"github.com/NexaCard/API/internal/urlguard"
 
 	"github.com/shopspring/decimal"
 )
@@ -61,6 +63,15 @@ func (s *SiteConnectionService) Create(input CreateConnectionInput) (*models.Sit
 		return nil, ErrConnectionInvalid
 	}
 
+	baseURL, err := urlguard.NormalizeServiceBaseURL(input.BaseURL)
+	if err != nil {
+		return nil, fmt.Errorf("%w: base_url %v", ErrConnectionInvalid, err)
+	}
+	callbackURL, err := urlguard.NormalizeTrustedCallbackURL(input.CallbackURL, true)
+	if err != nil {
+		return nil, fmt.Errorf("%w: callback_url %v", ErrConnectionInvalid, err)
+	}
+
 	protocol := strings.TrimSpace(input.Protocol)
 	if protocol == "" {
 		protocol = constants.ConnectionProtocolDujiaoNext
@@ -87,11 +98,11 @@ func (s *SiteConnectionService) Create(input CreateConnectionInput) (*models.Sit
 
 	conn := &models.SiteConnection{
 		Name:               strings.TrimSpace(input.Name),
-		BaseURL:            strings.TrimRight(strings.TrimSpace(input.BaseURL), "/"),
+		BaseURL:            baseURL,
 		ApiKey:             strings.TrimSpace(input.ApiKey),
 		ApiSecret:          encryptedSecret,
 		Protocol:           protocol,
-		CallbackURL:        strings.TrimSpace(input.CallbackURL),
+		CallbackURL:        callbackURL,
 		Status:             constants.ConnectionStatusPending,
 		RetryMax:           retryMax,
 		RetryIntervals:     retryIntervals,
@@ -137,7 +148,11 @@ func (s *SiteConnectionService) Update(id uint, input UpdateConnectionInput) (*m
 		conn.Name = strings.TrimSpace(input.Name)
 	}
 	if strings.TrimSpace(input.BaseURL) != "" {
-		conn.BaseURL = strings.TrimRight(strings.TrimSpace(input.BaseURL), "/")
+		baseURL, err := urlguard.NormalizeServiceBaseURL(input.BaseURL)
+		if err != nil {
+			return nil, fmt.Errorf("%w: base_url %v", ErrConnectionInvalid, err)
+		}
+		conn.BaseURL = baseURL
 	}
 	if strings.TrimSpace(input.ApiKey) != "" {
 		conn.ApiKey = strings.TrimSpace(input.ApiKey)
@@ -153,7 +168,11 @@ func (s *SiteConnectionService) Update(id uint, input UpdateConnectionInput) (*m
 		conn.Protocol = strings.TrimSpace(input.Protocol)
 	}
 	if input.CallbackURL != "" {
-		conn.CallbackURL = strings.TrimSpace(input.CallbackURL)
+		callbackURL, err := urlguard.NormalizeTrustedCallbackURL(input.CallbackURL, false)
+		if err != nil {
+			return nil, fmt.Errorf("%w: callback_url %v", ErrConnectionInvalid, err)
+		}
+		conn.CallbackURL = callbackURL
 	}
 	if input.RetryMax > 0 {
 		conn.RetryMax = input.RetryMax

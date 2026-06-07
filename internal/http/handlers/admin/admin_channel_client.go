@@ -38,6 +38,10 @@ func (h *Handler) CreateChannelClient(c *gin.Context) {
 
 	result, err := h.ChannelClientService.CreateChannelClient(req.Name, req.ChannelType, req.Description, req.BotToken, req.CallbackURL)
 	if err != nil {
+		if errors.Is(err, service.ErrChannelClientInvalid) {
+			shared.RespondError(c, response.CodeBadRequest, "error.bad_request", err)
+			return
+		}
 		shared.RespondError(c, response.CodeInternal, "error.channel_client_create_failed", err)
 		return
 	}
@@ -118,6 +122,10 @@ func (h *Handler) UpdateChannelClient(c *gin.Context) {
 
 	result, err := h.ChannelClientService.UpdateChannelClient(id, req.Name, req.Description, req.BotToken, req.CallbackURL)
 	if err != nil {
+		if errors.Is(err, service.ErrChannelClientInvalid) {
+			shared.RespondError(c, response.CodeBadRequest, "error.bad_request", err)
+			return
+		}
 		if errors.Is(err, service.ErrChannelClientNotFound) {
 			shared.RespondError(c, response.CodeNotFound, "error.not_found", nil)
 			return

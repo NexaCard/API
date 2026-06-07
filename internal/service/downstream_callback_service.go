@@ -16,6 +16,7 @@ import (
 	"github.com/NexaCard/API/internal/queue"
 	"github.com/NexaCard/API/internal/repository"
 	"github.com/NexaCard/API/internal/upstream"
+	"github.com/NexaCard/API/internal/urlguard"
 
 	"github.com/hibiken/asynq"
 )
@@ -45,9 +46,7 @@ func NewDownstreamCallbackService(
 		orderRepo:      orderRepo,
 		credentialRepo: credentialRepo,
 		queueClient:    queueClient,
-		httpClient: &http.Client{
-			Timeout: 15 * time.Second,
-		},
+		httpClient:     urlguard.NewPublicHTTPClient(15 * time.Second),
 	}
 }
 
@@ -56,6 +55,11 @@ func (s *DownstreamCallbackService) CreateRef(ref *models.DownstreamOrderRef) er
 	if ref == nil || ref.OrderID == 0 {
 		return errors.New("invalid downstream order ref")
 	}
+	callbackURL, err := urlguard.NormalizePublicCallbackURL(ref.CallbackURL, true)
+	if err != nil {
+		return fmt.Errorf("invalid downstream callback url: %w", err)
+	}
+	ref.CallbackURL = callbackURL
 	ref.CallbackStatus = constants.CallbackStatusPending
 	return s.refRepo.Create(ref)
 }
@@ -136,6 +140,20 @@ func (s *DownstreamCallbackService) SendCallback(refID uint) error {
 	if strings.TrimSpace(ref.CallbackURL) == "" {
 		return nil
 	}
+	callbackURL, err := urlguard.NormalizePublicCallbackURL(ref.CallbackURL, false)
+	if err != nil {
+		now := time.Now()
+		ref.CallbackStatus = constants.CallbackStatusFailed
+		ref.LastCallbackAt = &now
+		_ = s.refRepo.Update(ref)
+		logger.Warnw("downstream_callback_invalid_url",
+			"ref_id", ref.ID,
+			"order_id", ref.OrderID,
+			"callback_url", ref.CallbackURL,
+			"error", err,
+		)
+		return nil
+	}
 
 	// 查询订单
 	order, err := s.orderRepo.GetByID(ref.OrderID)
@@ -205,13 +223,13 @@ func (s *DownstreamCallbackService) SendCallback(refID uint) error {
 	logger.Infow("downstream_callback_sending",
 		"ref_id", ref.ID,
 		"order_id", order.ID,
-		"callback_url", ref.CallbackURL,
+		"callback_url", callbackURL,
 		"event", event,
 		"status", order.Status,
 		"has_fulfillment", fulfillment != nil,
 	)
 
-	httpReq, err := http.NewRequest("POST", ref.CallbackURL, bytes.NewReader(bodyBytes))
+	httpReq, err := http.NewRequest("POST", callbackURL, bytes.NewReader(bodyBytes))
 	if err != nil {
 		return err
 	}
@@ -224,7 +242,7 @@ func (s *DownstreamCallbackService) SendCallback(refID uint) error {
 	if err != nil {
 		logger.Warnw("downstream_callback_http_error",
 			"ref_id", ref.ID,
-			"callback_url", ref.CallbackURL,
+			"callback_url", callbackURL,
 			"error", err,
 		)
 		return s.handleCallbackFailure(ref, &now, err)

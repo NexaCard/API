@@ -4,9 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net"
 	"net/http"
-	"net/url"
 	"strings"
 	"time"
 
@@ -18,6 +16,7 @@ import (
 	"github.com/NexaCard/API/internal/repository"
 	"github.com/NexaCard/API/internal/service"
 	upstreamadapter "github.com/NexaCard/API/internal/upstream"
+	"github.com/NexaCard/API/internal/urlguard"
 
 	"github.com/gin-gonic/gin"
 )
@@ -345,12 +344,15 @@ func (h *Handler) CreateOrder(c *gin.Context) {
 		return
 	}
 
+	callbackURL := strings.TrimSpace(req.CallbackURL)
 	// 验证 callback URL（防止 SSRF）
 	if req.CallbackURL != "" {
-		if err := validateCallbackURL(req.CallbackURL); err != nil {
+		normalizedCallbackURL, err := urlguard.NormalizePublicCallbackURL(req.CallbackURL, false)
+		if err != nil {
 			errorResponse(c, http.StatusBadRequest, "invalid_callback_url", err.Error())
 			return
 		}
+		callbackURL = normalizedCallbackURL
 	}
 
 	// 幂等性检查：同一 credential 的相同 downstream_order_no 不允许重复创建
@@ -427,7 +429,7 @@ func (h *Handler) CreateOrder(c *gin.Context) {
 		OrderID:           order.ID,
 		ApiCredentialID:   credentialID,
 		DownstreamOrderNo: req.DownstreamOrderNo,
-		CallbackURL:       req.CallbackURL,
+		CallbackURL:       callbackURL,
 		TraceID:           req.TraceID,
 		CallbackStatus:    "pending",
 	}
@@ -436,7 +438,7 @@ func (h *Handler) CreateOrder(c *gin.Context) {
 			"order_id", order.ID,
 			"credential_id", credentialID,
 			"downstream_order_no", req.DownstreamOrderNo,
-			"callback_url", req.CallbackURL,
+			"callback_url", callbackURL,
 			"trace_id", req.TraceID,
 			"error", createErr,
 		)
@@ -444,7 +446,7 @@ func (h *Handler) CreateOrder(c *gin.Context) {
 		logger.Infow("upstream_downstream_ref_created",
 			"ref_id", ref.ID,
 			"order_id", order.ID,
-			"callback_url", req.CallbackURL,
+			"callback_url", callbackURL,
 		)
 	}
 
@@ -954,34 +956,6 @@ func computeSKUStock(p models.Product, s models.ProductSKU) (status string, quan
 }
 
 // mapOrderErrorToResponse 将订单创建错误映射为上游 API 错误响应
-// validateCallbackURL 验证回调 URL 的安全性（防止 SSRF）
-func validateCallbackURL(rawURL string) error {
-	parsed, err := url.Parse(rawURL)
-	if err != nil {
-		return fmt.Errorf("invalid url format")
-	}
-	scheme := strings.ToLower(parsed.Scheme)
-	if scheme != "http" && scheme != "https" {
-		return fmt.Errorf("callback url must use http or https")
-	}
-	host := parsed.Hostname()
-	if host == "" {
-		return fmt.Errorf("callback url must have a host")
-	}
-	// 禁止 localhost 和回环地址
-	if host == "localhost" || host == "127.0.0.1" || host == "::1" || host == "0.0.0.0" {
-		return fmt.Errorf("callback url must not point to localhost")
-	}
-	// 检查是否是内网 IP
-	ip := net.ParseIP(host)
-	if ip != nil {
-		if ip.IsLoopback() || ip.IsPrivate() || ip.IsLinkLocalUnicast() || ip.IsLinkLocalMulticast() {
-			return fmt.Errorf("callback url must not point to private network")
-		}
-	}
-	return nil
-}
-
 func mapOrderErrorToResponse(c *gin.Context, err error) {
 	switch {
 	case errors.Is(err, service.ErrWalletInsufficientBalance):

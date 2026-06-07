@@ -92,6 +92,10 @@ func (h *Handler) UpdateSiteConnection(c *gin.Context) {
 			shared.RespondError(c, response.CodeNotFound, "error.connection_not_found", nil)
 			return
 		}
+		if errors.Is(err, service.ErrConnectionInvalid) {
+			shared.RespondError(c, response.CodeBadRequest, "error.connection_invalid", err)
+			return
+		}
 		shared.RespondError(c, response.CodeInternal, "error.connection_update_failed", err)
 		return
 	}

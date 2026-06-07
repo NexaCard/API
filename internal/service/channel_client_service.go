@@ -9,6 +9,7 @@ import (
 	"github.com/NexaCard/API/internal/models"
 	"github.com/NexaCard/API/internal/repository"
 	"github.com/NexaCard/API/internal/upstream"
+	"github.com/NexaCard/API/internal/urlguard"
 )
 
 // ChannelClientService 渠道客户端业务服务
@@ -43,6 +44,11 @@ type ChannelClientResponse struct {
 
 // CreateChannelClient 创建渠道客户端
 func (s *ChannelClientService) CreateChannelClient(name, channelType, description, botToken, callbackURL string) (*ChannelClientResponse, error) {
+	normalizedCallbackURL, err := urlguard.NormalizeTrustedCallbackURL(callbackURL, true)
+	if err != nil {
+		return nil, fmt.Errorf("%w: callback_url %v", ErrChannelClientInvalid, err)
+	}
+
 	// 生成随机 key (32 bytes = 64 hex chars)
 	keyBytes := make([]byte, 32)
 	if _, err := rand.Read(keyBytes); err != nil {
@@ -68,7 +74,7 @@ func (s *ChannelClientService) CreateChannelClient(name, channelType, descriptio
 		ChannelType:   channelType,
 		ChannelKey:    channelKey,
 		ChannelSecret: encryptedSecret,
-		CallbackURL:   callbackURL,
+		CallbackURL:   normalizedCallbackURL,
 		Status:        1,
 		Description:   description,
 	}
@@ -274,7 +280,11 @@ func (s *ChannelClientService) UpdateChannelClient(id uint, name, description st
 	}
 	client.Description = description
 	if callbackURL != nil {
-		client.CallbackURL = *callbackURL
+		normalizedCallbackURL, err := urlguard.NormalizeTrustedCallbackURL(*callbackURL, true)
+		if err != nil {
+			return nil, fmt.Errorf("%w: callback_url %v", ErrChannelClientInvalid, err)
+		}
+		client.CallbackURL = normalizedCallbackURL
 	}
 
 	// botToken 为 nil 表示不修改；非 nil 则更新（空字符串表示清空）

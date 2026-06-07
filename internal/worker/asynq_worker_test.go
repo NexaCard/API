@@ -35,6 +35,18 @@ func TestBuildBotNotifyRequestURLReplacesOrderPaidPath(t *testing.T) {
 	}
 }
 
+func TestBuildBotNotifyRequestURLRejectsInvalidURL(t *testing.T) {
+	if _, err := buildBotNotifyRequestURL("file:///tmp/callback", "/internal/order-paid"); err == nil {
+		t.Fatal("expected invalid callback url error")
+	}
+	if _, err := buildBotNotifyRequestURL("https://user:pass@bot.example.com/internal/order-fulfilled", "/internal/order-paid"); err == nil {
+		t.Fatal("expected user info callback url error")
+	}
+	if _, err := buildBotNotifyRequestURL("https://bot.example.com/internal/order-fulfilled", "internal/order-paid"); err == nil {
+		t.Fatal("expected invalid callback path error")
+	}
+}
+
 func TestBuildOrderFulfillmentEmailPayloadNilOrder(t *testing.T) {
 	if got := buildOrderFulfillmentEmailPayload(nil); got != "" {
 		t.Fatalf("expected empty payload for nil order, got %q", got)

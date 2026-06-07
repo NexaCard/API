@@ -166,6 +166,7 @@ var (
 	ErrNotificationConfigInvalid           = errors.New("notification config invalid")
 	ErrNotificationSendFailed              = errors.New("notification send failed")
 	ErrNotificationEventInvalid            = errors.New("notification event invalid")
+	ErrChannelClientInvalid                = errors.New("channel client invalid")
 	ErrChannelClientNotFound               = errors.New("channel client not found")
 	ErrChannelClientDisabled               = errors.New("channel client disabled")
 	ErrChannelSignatureInvalid             = errors.New("channel signature invalid")

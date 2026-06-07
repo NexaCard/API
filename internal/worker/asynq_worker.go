@@ -21,6 +21,7 @@ import (
 	"github.com/NexaCard/API/internal/service"
 	"github.com/NexaCard/API/internal/telegramidentity"
 	"github.com/NexaCard/API/internal/upstream"
+	"github.com/NexaCard/API/internal/urlguard"
 
 	"github.com/hibiken/asynq"
 )
@@ -679,7 +680,10 @@ func (c *Consumer) handleBotNotify(_ context.Context, task *asynq.Task) error {
 	req.Header.Set("Dujiao-Next-Channel-Timestamp", strconv.FormatInt(timestamp, 10))
 	req.Header.Set("Dujiao-Next-Channel-Signature", signature)
 
-	httpClient := &http.Client{Timeout: 10 * time.Second}
+	httpClient := &http.Client{
+		Timeout:       10 * time.Second,
+		CheckRedirect: urlguard.NoRedirectPolicy,
+	}
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		logger.Warnw("worker_bot_notify_request_failed",
@@ -707,12 +711,17 @@ func (c *Consumer) handleBotNotify(_ context.Context, task *asynq.Task) error {
 
 // buildBotNotifyRequestURL 构建 Bot 回调请求URL并重置查询参数。
 func buildBotNotifyRequestURL(rawURL string, path string) (string, error) {
-	parsed, err := url.Parse(strings.TrimSpace(rawURL))
+	normalizedURL, err := urlguard.NormalizeTrustedCallbackURL(rawURL, false)
 	if err != nil {
 		return "", err
 	}
-	if parsed.Scheme == "" || parsed.Host == "" {
-		return "", fmt.Errorf("invalid callback url: %s", rawURL)
+	if !strings.HasPrefix(path, "/") {
+		return "", fmt.Errorf("invalid callback path: %s", path)
+	}
+
+	parsed, err := url.Parse(normalizedURL)
+	if err != nil {
+		return "", err
 	}
 
 	parsed.Path = path
