@@ -14,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/NexaCard/API/internal/httpio"
 	"github.com/NexaCard/API/internal/logger"
 	"github.com/NexaCard/API/internal/models"
 	"github.com/NexaCard/API/internal/urlguard"
@@ -390,7 +391,7 @@ func (a *DujiaoNextAdapter) doRequest(ctx context.Context, method, path string, 
 	}
 	defer resp.Body.Close()
 
-	respBody, err := io.ReadAll(resp.Body)
+	respBody, err := httpio.ReadAllLimited(resp.Body, 0)
 	if err != nil {
 		return fmt.Errorf("read response: %w", err)
 	}
@@ -398,7 +399,7 @@ func (a *DujiaoNextAdapter) doRequest(ctx context.Context, method, path string, 
 	if resp.StatusCode != http.StatusOK {
 		logger.Warnw("upstream_request_error",
 			"method", method, "path", path,
-			"status", resp.StatusCode, "body", string(respBody))
+			"status", resp.StatusCode, "body", httpio.Snippet(respBody, 0))
 		// 尝试解析结构化错误响应
 		var errPayload struct {
 			ErrorCode    string `json:"error_code"`
@@ -409,7 +410,7 @@ func (a *DujiaoNextAdapter) doRequest(ctx context.Context, method, path string, 
 			Status:  resp.StatusCode,
 			Code:    errPayload.ErrorCode,
 			Message: errPayload.ErrorMessage,
-			Body:    string(respBody),
+			Body:    httpio.Snippet(respBody, 0),
 		}
 	}
 

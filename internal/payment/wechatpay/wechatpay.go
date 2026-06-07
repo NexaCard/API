@@ -9,7 +9,6 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"io"
 	"net"
 	"net/http"
 	"net/url"
@@ -18,6 +17,7 @@ import (
 	"time"
 
 	"github.com/NexaCard/API/internal/constants"
+	"github.com/NexaCard/API/internal/httpio"
 	"github.com/NexaCard/API/internal/payment/common"
 
 	"github.com/shopspring/decimal"
@@ -451,13 +451,13 @@ func parseAPIResult(result *core.APIResult) (map[string]interface{}, error) {
 	}
 	defer result.Response.Body.Close()
 
-	respBody, readErr := io.ReadAll(result.Response.Body)
+	respBody, readErr := httpio.ReadAllLimited(result.Response.Body, 0)
 	if readErr != nil {
 		return nil, fmt.Errorf("%w: read response failed", ErrResponseInvalid)
 	}
 	if result.Response.StatusCode < 200 || result.Response.StatusCode >= 300 {
 		if len(respBody) > 0 {
-			return nil, fmt.Errorf("%w: status %d body %s", ErrResponseInvalid, result.Response.StatusCode, strings.TrimSpace(string(respBody)))
+			return nil, fmt.Errorf("%w: status %d body %s", ErrResponseInvalid, result.Response.StatusCode, httpio.Snippet(respBody, 1024))
 		}
 		return nil, fmt.Errorf("%w: status %d", ErrResponseInvalid, result.Response.StatusCode)
 	}

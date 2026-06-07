@@ -4,6 +4,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -30,6 +31,32 @@ func TestKeyByIPAndJSONField(t *testing.T) {
 	}
 	if !strings.Contains(string(body), "Test@Example.com") {
 		t.Fatalf("request body should be restored after reading field")
+	}
+}
+
+func TestKeyByIPAndJSONFieldRestoresLargeBodyAndFallsBackToIP(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	largeValue := strings.Repeat("x", int(rateLimitJSONFieldMaxBytes)+128)
+	rawBody := `{"email":"` + largeValue + `"}`
+	c.Request = httptest.NewRequest(http.MethodPost, "/auth", strings.NewReader(rawBody))
+	c.Request.Header.Set("Content-Type", "application/json")
+	c.Request.Header.Set("Content-Length", strconv.Itoa(len(rawBody)))
+	c.Request.RemoteAddr = "1.2.3.4:5678"
+
+	key := KeyByIPAndJSONField("email")(c)
+	if key != "1.2.3.4" {
+		t.Fatalf("large field should fall back to IP key, got %s", key)
+	}
+
+	body, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		t.Fatalf("read body after key extraction failed: %v", err)
+	}
+	if string(body) != rawBody {
+		t.Fatalf("request body should be fully restored after oversized field read")
 	}
 }
 

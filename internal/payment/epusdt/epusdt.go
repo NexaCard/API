@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"sort"
 	"strconv"
@@ -15,6 +14,7 @@ import (
 	"time"
 
 	"github.com/NexaCard/API/internal/constants"
+	"github.com/NexaCard/API/internal/httpio"
 	"github.com/NexaCard/API/internal/payment/common"
 )
 
@@ -297,7 +297,7 @@ func postJSON(ctx context.Context, endpoint string, params map[string]interface{
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return nil, fmt.Errorf("http status %d", resp.StatusCode)
 	}
-	return io.ReadAll(resp.Body)
+	return httpio.ReadAllLimited(resp.Body, 0)
 }
 
 // ParseCallback 解析 epusdt 回调 JSON

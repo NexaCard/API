@@ -5,6 +5,7 @@ db
 uploads
 *.db
 *.log
+tmp/
 .env
 .DS_Store
 */node_modules/

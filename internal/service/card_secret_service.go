@@ -6,10 +6,10 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"math/rand"
 	"mime/multipart"
 	"strconv"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/NexaCard/API/internal/constants"
@@ -31,6 +31,8 @@ const (
 	CardSecretCSVMaxBytes       int64 = 2 << 20
 	cardSecretCSVMaxSecretCount       = 10000
 )
+
+var cardSecretBatchNoSeq uint64
 
 // NewCardSecretService 创建卡密库存服务
 func NewCardSecretService(secretRepo repository.CardSecretRepository, batchRepo repository.CardSecretBatchRepository, productRepo repository.ProductRepository, productSKURepo repository.ProductSKURepository) *CardSecretService {
@@ -804,9 +806,9 @@ func parseCSVSecrets(reader io.Reader) ([]string, error) {
 }
 
 func generateBatchNo() string {
-	now := time.Now().Format("20060102150405")
-	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
-	return fmt.Sprintf("BATCH-%s-%04d", now, rng.Intn(10000))
+	now := time.Now().UTC()
+	seq := atomic.AddUint64(&cardSecretBatchNoSeq, 1) % 1000000
+	return fmt.Sprintf("BATCH-%s-%09d-%06d", now.Format("20060102150405"), now.Nanosecond(), seq)
 }
 
 func normalizeCardSecretIDs(ids []uint) []uint {

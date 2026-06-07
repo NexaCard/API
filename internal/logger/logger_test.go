@@ -54,6 +54,9 @@ func TestNewReleaseWritesToConfiguredFile(t *testing.T) {
 	log := New("release", cfg)
 	log.Info("release-log-test")
 	_ = log.Sync()
+	t.Cleanup(func() {
+		_ = log.Sync()
+	})
 
 	content, err := os.ReadFile(filepath.Join(tmpDir, "release.log"))
 	if err != nil {

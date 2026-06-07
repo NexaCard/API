@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -14,6 +13,7 @@ import (
 	"time"
 
 	"github.com/NexaCard/API/internal/constants"
+	"github.com/NexaCard/API/internal/httpio"
 	"github.com/NexaCard/API/internal/payment/common"
 	"github.com/shopspring/decimal"
 )
@@ -551,7 +551,7 @@ func getAccessToken(ctx context.Context, cfg *Config) (string, error) {
 	}
 	defer resp.Body.Close()
 
-	body, err := io.ReadAll(resp.Body)
+	body, err := httpio.ReadAllLimited(resp.Body, 0)
 	if err != nil {
 		return "", fmt.Errorf("%w: read token response failed", ErrAuthFailed)
 	}
@@ -593,7 +593,7 @@ func doJSONRequest(ctx context.Context, cfg *Config, method, endpoint, token str
 	}
 	defer resp.Body.Close()
 
-	respBody, err := io.ReadAll(resp.Body)
+	respBody, err := httpio.ReadAllLimited(resp.Body, 0)
 	if err != nil {
 		return nil, resp.StatusCode, fmt.Errorf("%w: read response failed", ErrRequestFailed)
 	}

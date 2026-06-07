@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"sort"
@@ -16,6 +15,7 @@ import (
 	"time"
 
 	"github.com/NexaCard/API/internal/constants"
+	"github.com/NexaCard/API/internal/httpio"
 	"github.com/NexaCard/API/internal/payment/common"
 	"github.com/shopspring/decimal"
 )
@@ -392,7 +392,7 @@ func postForm(ctx context.Context, endpoint string, payload map[string]string) (
 	}
 	defer resp.Body.Close()
 
-	body, err := io.ReadAll(resp.Body)
+	body, err := httpio.ReadAllLimited(resp.Body, 0)
 	if err != nil {
 		return nil, err
 	}

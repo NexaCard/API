@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"sort"
 	"strconv"
@@ -15,6 +14,7 @@ import (
 	"time"
 
 	"github.com/NexaCard/API/internal/constants"
+	"github.com/NexaCard/API/internal/httpio"
 	"github.com/NexaCard/API/internal/payment/common"
 )
 
@@ -356,7 +356,7 @@ func postJSON(ctx context.Context, endpoint string, params map[string]interface{
 		return nil, fmt.Errorf("http status %d", resp.StatusCode)
 	}
 
-	return io.ReadAll(resp.Body)
+	return httpio.ReadAllLimited(resp.Body, 0)
 }
 
 // IsSupportedChannelType 判断是否支持的渠道类型

@@ -93,7 +93,7 @@ func (h *Handler) CreatePaymentChannel(c *gin.Context) {
 	}
 	_ = cache.Del(c.Request.Context(), publicConfigCacheKey)
 
-	response.Success(c, channel)
+	response.Success(c, paymentChannelAdminResponse(channel))
 }
 
 // UpdatePaymentChannelRequest 更新支付渠道请求
@@ -141,6 +141,23 @@ func (h *Handler) UpdatePaymentChannel(c *gin.Context) {
 		return
 	}
 
+	originalProviderType := channel.ProviderType
+	originalChannelType := channel.ChannelType
+	nextProviderType := channel.ProviderType
+	nextChannelType := channel.ChannelType
+	if req.ProviderType != "" {
+		nextProviderType = req.ProviderType
+	}
+	if req.ChannelType != "" {
+		nextChannelType = req.ChannelType
+	}
+	preserveSecrets := req.ConfigJSON != nil && samePaymentChannelProvider(
+		originalProviderType,
+		originalChannelType,
+		nextProviderType,
+		nextChannelType,
+	)
+
 	if req.Name != "" {
 		channel.Name = req.Name
 	}
@@ -177,9 +194,6 @@ func (h *Handler) UpdatePaymentChannel(c *gin.Context) {
 	if req.PaymentTypes != nil {
 		channel.PaymentTypes = req.PaymentTypes
 	}
-	if req.ConfigJSON != nil {
-		channel.ConfigJSON = models.JSON(req.ConfigJSON)
-	}
 	if req.IsActive != nil {
 		channel.IsActive = *req.IsActive
 	}
@@ -188,6 +202,9 @@ func (h *Handler) UpdatePaymentChannel(c *gin.Context) {
 	}
 	if req.SortOrder != nil {
 		channel.SortOrder = *req.SortOrder
+	}
+	if req.ConfigJSON != nil {
+		channel.ConfigJSON = mergePaymentChannelConfigForUpdate(channel.ConfigJSON, req.ConfigJSON, preserveSecrets)
 	}
 
 	if err := h.PaymentService.ValidateChannel(channel); err != nil {
@@ -208,7 +225,7 @@ func (h *Handler) UpdatePaymentChannel(c *gin.Context) {
 	}
 	_ = cache.Del(c.Request.Context(), publicConfigCacheKey)
 
-	response.Success(c, channel)
+	response.Success(c, paymentChannelAdminResponse(channel))
 }
 
 // DeletePaymentChannel 删除支付渠道
@@ -247,7 +264,7 @@ func (h *Handler) GetPaymentChannel(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, channel)
+	response.Success(c, paymentChannelAdminResponse(channel))
 }
 
 // GetPaymentChannels 获取支付渠道列表
@@ -275,5 +292,5 @@ func (h *Handler) GetPaymentChannels(c *gin.Context) {
 	}
 
 	pagination := response.BuildPagination(page, pageSize, total)
-	response.SuccessWithPage(c, channels, pagination)
+	response.SuccessWithPage(c, paymentChannelAdminListResponse(channels), pagination)
 }

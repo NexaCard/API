@@ -14,6 +14,8 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+const rateLimitJSONFieldMaxBytes int64 = 64 << 10
+
 // RateLimitKeyFunc 生成限流 key 的函数
 type RateLimitKeyFunc func(*gin.Context) string
 
@@ -161,12 +163,15 @@ func readJSONField(c *gin.Context, field string) string {
 	if c == nil || c.Request == nil || c.Request.Body == nil {
 		return ""
 	}
-	body, err := io.ReadAll(c.Request.Body)
+	body, err := io.ReadAll(io.LimitReader(c.Request.Body, rateLimitJSONFieldMaxBytes+1))
+	c.Request.Body = io.NopCloser(io.MultiReader(bytes.NewReader(body), c.Request.Body))
 	if err != nil {
 		return ""
 	}
-	c.Request.Body = io.NopCloser(bytes.NewBuffer(body))
 	if len(body) == 0 {
+		return ""
+	}
+	if int64(len(body)) > rateLimitJSONFieldMaxBytes {
 		return ""
 	}
 	var payload map[string]interface{}

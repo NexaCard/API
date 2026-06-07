@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"math"
 	"net/http"
 	"net/url"
@@ -18,6 +17,7 @@ import (
 	"time"
 
 	"github.com/NexaCard/API/internal/constants"
+	"github.com/NexaCard/API/internal/httpio"
 	"github.com/NexaCard/API/internal/payment/common"
 
 	"github.com/shopspring/decimal"
@@ -603,7 +603,7 @@ func doFormRequest(ctx context.Context, cfg *Config, method, path string, form u
 		return nil, 0, fmt.Errorf("%w: %v", ErrRequestFailed, err)
 	}
 	defer resp.Body.Close()
-	body, err := io.ReadAll(resp.Body)
+	body, err := httpio.ReadAllLimited(resp.Body, 0)
 	if err != nil {
 		return nil, resp.StatusCode, fmt.Errorf("%w: read response failed", ErrResponseInvalid)
 	}
@@ -626,7 +626,7 @@ func doJSONRequest(ctx context.Context, cfg *Config, method, path string) ([]byt
 		return nil, 0, fmt.Errorf("%w: %v", ErrRequestFailed, err)
 	}
 	defer resp.Body.Close()
-	body, err := io.ReadAll(resp.Body)
+	body, err := httpio.ReadAllLimited(resp.Body, 0)
 	if err != nil {
 		return nil, resp.StatusCode, fmt.Errorf("%w: read response failed", ErrResponseInvalid)
 	}

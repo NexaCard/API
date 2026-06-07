@@ -5,12 +5,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"time"
 
 	"github.com/NexaCard/API/internal/adgateway"
+	"github.com/NexaCard/API/internal/httpio"
 	"github.com/NexaCard/API/internal/logger"
 )
 
@@ -88,13 +88,13 @@ func (s *AdProxyService) RenderSlot(ctx context.Context, slotCode string, params
 	}
 	defer resp.Body.Close()
 
-	body, err := io.ReadAll(resp.Body)
+	body, err := httpio.ReadAllLimited(resp.Body, 0)
 	if err != nil {
 		return nil, fmt.Errorf("ad_proxy: read response failed: %w", err)
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		logger.Warnw("ad_proxy_render_slot_non_ok", "slot_code", slotCode, "status", resp.StatusCode, "body", string(body))
+		logger.Warnw("ad_proxy_render_slot_non_ok", "slot_code", slotCode, "status", resp.StatusCode, "body", httpio.Snippet(body, 0))
 		return nil, fmt.Errorf("ad_proxy: upstream returned %d", resp.StatusCode)
 	}
 
@@ -129,7 +129,7 @@ func (s *AdProxyService) ReportImpression(ctx context.Context, payload json.RawM
 		return fmt.Errorf("ad_proxy: request failed: %w", err)
 	}
 	defer resp.Body.Close()
-	io.Copy(io.Discard, resp.Body)
+	_, _ = httpio.ReadAllLimited(resp.Body, 64<<10)
 
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("ad_proxy: upstream returned %d", resp.StatusCode)

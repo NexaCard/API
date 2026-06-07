@@ -4,9 +4,9 @@ import (
 	"testing"
 
 	"github.com/NexaCard/API/internal/models"
+	"github.com/glebarez/sqlite"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
 	"github.com/NexaCard/API/internal/repository"

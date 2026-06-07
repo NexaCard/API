@@ -15,7 +15,6 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"sort"
@@ -24,6 +23,7 @@ import (
 	"time"
 
 	"github.com/NexaCard/API/internal/constants"
+	"github.com/NexaCard/API/internal/httpio"
 	"github.com/NexaCard/API/internal/payment/common"
 )
 
@@ -508,7 +508,7 @@ func postForm(ctx context.Context, endpoint string, params map[string]string) ([
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return nil, ErrRequestFailed
 	}
-	body, err := io.ReadAll(resp.Body)
+	body, err := httpio.ReadAllLimited(resp.Body, 0)
 	if err != nil {
 		return nil, err
 	}
