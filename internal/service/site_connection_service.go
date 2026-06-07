@@ -72,9 +72,9 @@ func (s *SiteConnectionService) Create(input CreateConnectionInput) (*models.Sit
 		return nil, fmt.Errorf("%w: callback_url %v", ErrConnectionInvalid, err)
 	}
 
-	protocol := strings.TrimSpace(input.Protocol)
-	if protocol == "" {
-		protocol = constants.ConnectionProtocolDujiaoNext
+	protocol, err := normalizeConnectionProtocol(input.Protocol)
+	if err != nil {
+		return nil, err
 	}
 
 	encryptedSecret, err := crypto.Encrypt(s.encryptKey, input.ApiSecret)
@@ -165,7 +165,11 @@ func (s *SiteConnectionService) Update(id uint, input UpdateConnectionInput) (*m
 		conn.ApiSecret = encrypted
 	}
 	if strings.TrimSpace(input.Protocol) != "" {
-		conn.Protocol = strings.TrimSpace(input.Protocol)
+		protocol, err := normalizeConnectionProtocol(input.Protocol)
+		if err != nil {
+			return nil, err
+		}
+		conn.Protocol = protocol
 	}
 	if input.CallbackURL != "" {
 		callbackURL, err := urlguard.NormalizeTrustedCallbackURL(input.CallbackURL, false)
@@ -204,6 +208,17 @@ func (s *SiteConnectionService) Update(id uint, input UpdateConnectionInput) (*m
 }
 
 // Delete 删除连接
+func normalizeConnectionProtocol(protocol string) (string, error) {
+	switch strings.TrimSpace(protocol) {
+	case "", constants.ConnectionProtocolNexaCardOpenAPI:
+		return constants.ConnectionProtocolNexaCardOpenAPI, nil
+	case constants.ConnectionProtocolDujiaoNext:
+		return constants.ConnectionProtocolDujiaoNext, nil
+	default:
+		return "", fmt.Errorf("%w: unsupported protocol %q", ErrConnectionInvalid, protocol)
+	}
+}
+
 func (s *SiteConnectionService) Delete(id uint) error {
 	conn, err := s.connRepo.GetByID(id)
 	if err != nil {

@@ -6,7 +6,7 @@ app:
 
 server:
   host: 0.0.0.0
-  port: 8080
+  port: 5175
   mode: debug  # debug 或 release
 
 log:
@@ -149,5 +149,5 @@ order:
 web:
   # 后台访问路径前缀
   # 强烈建议改成不易猜测的字符串以降低自动化扫描风险
-  # 例如: "/dj-mgmt-7x9k2" 或 "/console-private"
+  # 例如: "/nexa-console-7x9k2" 或 "/console-private"
   admin_path: "/admin"

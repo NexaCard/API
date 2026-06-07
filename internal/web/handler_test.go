@@ -19,7 +19,7 @@ func TestValidateAdminPath(t *testing.T) {
 		errSubstr string
 	}{
 		{"valid default", "/admin", false, ""},
-		{"valid custom", "/dj-mgmt-7x9k2", false, ""},
+		{"valid custom", "/nexa-console-7x9k2", false, ""},
 		{"valid with dashes", "/console-private", false, ""},
 
 		{"empty", "", true, "must start with"},
@@ -56,10 +56,10 @@ func TestValidateAdminPath(t *testing.T) {
 
 func newAdminFS(indexHTML string) fstest.MapFS {
 	return fstest.MapFS{
-		"index.html":      &fstest.MapFile{Data: []byte(indexHTML)},
-		"assets/app.js":   &fstest.MapFile{Data: []byte("console.log('app');")},
-		"assets/app.css":  &fstest.MapFile{Data: []byte("body{}")},
-		"favicon.ico":     &fstest.MapFile{Data: []byte("\x00\x00")},
+		"index.html":     &fstest.MapFile{Data: []byte(indexHTML)},
+		"assets/app.js":  &fstest.MapFile{Data: []byte("console.log('app');")},
+		"assets/app.css": &fstest.MapFile{Data: []byte("body{}")},
+		"favicon.ico":    &fstest.MapFile{Data: []byte("\x00\x00")},
 	}
 }
 
@@ -67,12 +67,12 @@ func TestRegisterAdmin_PlaceholderReplacement(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
 
-	html := `<!doctype html><html><head><base href="__DJ_ADMIN_BASE__/"><title>x</title></head><body></body></html>`
-	if err := RegisterAdmin(r, "/dj-mgmt-7x9k2", newAdminFS(html)); err != nil {
+	html := `<!doctype html><html><head><base href="__NEXACARD_ADMIN_BASE__/"><title>x</title></head><body></body></html>`
+	if err := RegisterAdmin(r, "/nexa-console-7x9k2", newAdminFS(html)); err != nil {
 		t.Fatalf("RegisterAdmin: %v", err)
 	}
 
-	req := httptest.NewRequest(http.MethodGet, "/dj-mgmt-7x9k2/", nil)
+	req := httptest.NewRequest(http.MethodGet, "/nexa-console-7x9k2/", nil)
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
@@ -80,10 +80,10 @@ func TestRegisterAdmin_PlaceholderReplacement(t *testing.T) {
 		t.Fatalf("status = %d, want 200", w.Code)
 	}
 	body, _ := io.ReadAll(w.Body)
-	if !strings.Contains(string(body), `<base href="/dj-mgmt-7x9k2/">`) {
+	if !strings.Contains(string(body), `<base href="/nexa-console-7x9k2/">`) {
 		t.Fatalf("placeholder not replaced or missing leading slash; body = %s", body)
 	}
-	if strings.Contains(string(body), "__DJ_ADMIN_BASE__") {
+	if strings.Contains(string(body), "__NEXACARD_ADMIN_BASE__") {
 		t.Fatalf("placeholder still present in body")
 	}
 }
@@ -98,13 +98,13 @@ func TestRegisterAdmin_BaseHrefIsAbsolute(t *testing.T) {
 		want   string
 	}{
 		{"default admin", "/admin", `<base href="/admin/">`},
-		{"deep custom", "/dj-mgmt-7x9k2", `<base href="/dj-mgmt-7x9k2/">`},
+		{"deep custom", "/nexa-console-7x9k2", `<base href="/nexa-console-7x9k2/">`},
 		{"with multiple segments", "/console-private", `<base href="/console-private/">`},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			r := gin.New()
-			html := `<head><base href="__DJ_ADMIN_BASE__/"></head>`
+			html := `<head><base href="__NEXACARD_ADMIN_BASE__/"></head>`
 			if err := RegisterAdmin(r, c.prefix, newAdminFS(html)); err != nil {
 				t.Fatalf("RegisterAdmin: %v", err)
 			}
@@ -144,7 +144,7 @@ func TestRegisterAdmin_HistoryFallback(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
 
-	html := `<!doctype html><html><head><base href="__DJ_ADMIN_BASE__/"></head><body>spa</body></html>`
+	html := `<!doctype html><html><head><base href="__NEXACARD_ADMIN_BASE__/"></head><body>spa</body></html>`
 	if err := RegisterAdmin(r, "/admin", newAdminFS(html)); err != nil {
 		t.Fatalf("RegisterAdmin: %v", err)
 	}
@@ -185,9 +185,9 @@ func TestRegisterAdmin_MissingIndex(t *testing.T) {
 
 func newUserFS() fstest.MapFS {
 	return fstest.MapFS{
-		"index.html":     &fstest.MapFile{Data: []byte("<html>user-spa</html>")},
-		"assets/u.js":    &fstest.MapFile{Data: []byte("console.log('u');")},
-		"robots.txt":     &fstest.MapFile{Data: []byte("User-agent: *\n")},
+		"index.html":  &fstest.MapFile{Data: []byte("<html>user-spa</html>")},
+		"assets/u.js": &fstest.MapFile{Data: []byte("console.log('u');")},
+		"robots.txt":  &fstest.MapFile{Data: []byte("User-agent: *\n")},
 	}
 }
 

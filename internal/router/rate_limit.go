@@ -9,6 +9,7 @@ import (
 
 	"github.com/NexaCard/API/internal/http/response"
 	"github.com/NexaCard/API/internal/i18n"
+	"github.com/NexaCard/API/internal/upstream"
 
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
@@ -141,7 +142,7 @@ func KeyByIP(c *gin.Context) string {
 
 // KeyByUpstreamApiKey 使用上游 API Key 作为限流 key
 func KeyByUpstreamApiKey(c *gin.Context) string {
-	apiKey := c.GetHeader("Dujiao-Next-Api-Key")
+	apiKey, _, _ := upstream.AuthHeaders(c.Request.Header)
 	if apiKey != "" {
 		return apiKey
 	}

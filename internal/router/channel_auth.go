@@ -19,18 +19,12 @@ const (
 	channelClientIDKey = "channel_client_id"
 	channelKeyCtxKey   = "channel_key"
 	channelTypeCtxKey  = "channel_type"
-
-	channelHeaderKey       = "Dujiao-Next-Channel-Key"
-	channelHeaderTimestamp = "Dujiao-Next-Channel-Timestamp"
-	channelHeaderSignature = "Dujiao-Next-Channel-Signature"
 )
 
 // ChannelAPIAuthMiddleware 渠道 API 签名鉴权中间件
 func ChannelAPIAuthMiddleware(container *provider.Container) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		channelKey := c.GetHeader(channelHeaderKey)
-		timestampStr := c.GetHeader(channelHeaderTimestamp)
-		signature := c.GetHeader(channelHeaderSignature)
+		channelKey, timestampStr, signature := upstream.ChannelAuthHeaders(c.Request.Header)
 
 		if channelKey == "" || timestampStr == "" || signature == "" {
 			response.ChannelError(c, http.StatusUnauthorized, response.CodeUnauthorized, i18n.T(i18n.ResolveLocale(c), "error.unauthorized"), "channel_client_unauthorized")

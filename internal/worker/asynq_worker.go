@@ -676,9 +676,9 @@ func (c *Consumer) handleBotNotify(_ context.Context, task *asynq.Task) error {
 		return fmt.Errorf("create bot notify request: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Dujiao-Next-Channel-Key", channelClient.ChannelKey)
-	req.Header.Set("Dujiao-Next-Channel-Timestamp", strconv.FormatInt(timestamp, 10))
-	req.Header.Set("Dujiao-Next-Channel-Signature", signature)
+	req.Header.Set(upstream.ChannelHeaderKey, channelClient.ChannelKey)
+	req.Header.Set(upstream.ChannelHeaderTimestamp, strconv.FormatInt(timestamp, 10))
+	req.Header.Set(upstream.ChannelHeaderSignature, signature)
 
 	httpClient := &http.Client{
 		Timeout:       10 * time.Second,

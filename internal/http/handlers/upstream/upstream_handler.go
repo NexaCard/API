@@ -656,9 +656,7 @@ type callbackPayload struct {
 // HandleCallback POST /api/v1/upstream/callback (A 站点接收 B 站回调)
 func (h *Handler) HandleCallback(c *gin.Context) {
 	// ---- 签名验证 ----
-	apiKey := c.GetHeader(upstreamadapter.HeaderApiKey)
-	timestampStr := c.GetHeader(upstreamadapter.HeaderTimestamp)
-	signature := c.GetHeader(upstreamadapter.HeaderSignature)
+	apiKey, timestampStr, signature := upstreamadapter.AuthHeaders(c.Request.Header)
 
 	if apiKey == "" || timestampStr == "" || signature == "" {
 		c.JSON(http.StatusOK, gin.H{"ok": false, "message": "missing authentication headers"})

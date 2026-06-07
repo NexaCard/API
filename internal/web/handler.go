@@ -39,12 +39,12 @@ func ValidateAdminPath(p string) error {
 	return nil
 }
 
-// 占位符：admin/index.html 中的 __DJ_ADMIN_BASE__ 启动时被替换为实际 admin path
-const adminBasePlaceholder = "__DJ_ADMIN_BASE__"
+// 占位符：admin/index.html 中的 __NEXACARD_ADMIN_BASE__ 启动时被替换为实际 admin path
+const adminBasePlaceholder = "__NEXACARD_ADMIN_BASE__"
 
 // RegisterAdmin 在 prefix 前缀下挂载 admin SPA。
 //
-// 启动时从 fsys 读取 index.html，把 __DJ_ADMIN_BASE__ 一次性替换为 strings.Trim(prefix, "/")，
+// 启动时从 fsys 读取 index.html，把 __NEXACARD_ADMIN_BASE__ 一次性替换为 strings.Trim(prefix, "/")，
 // 然后缓存。后续请求走该缓存，不做实时替换。
 //
 // 路由匹配规则：

@@ -368,7 +368,8 @@ const (
 
 // 对接协议类型常量
 const (
-	ConnectionProtocolDujiaoNext = "dujiao-next"
+	ConnectionProtocolNexaCardOpenAPI = "nexacard-openapi"
+	ConnectionProtocolDujiaoNext      = "dujiao-next"
 )
 
 // API 凭证状态常量

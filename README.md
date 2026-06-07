@@ -1,37 +1,67 @@
 # NexaCard API
 
-NexaCard API is the backend service for the NexaCard ecosystem. It provides public APIs, user/auth APIs, order and payment workflows, and admin APIs.
+Backend service for NexaCard. It provides public storefront APIs, user authentication, order and payment workflows, admin APIs, upload serving, workers, and release update checks.
 
 ## Secondary Development Notice
 
-NexaCard is an independently maintained secondary-development branch based on the open-source Dujiao-Next project. NexaCard uses its own branding, release packages, update checks, and documentation under the `NexaCard` GitHub organization. See [NOTICE.md](./NOTICE.md) for details.
+NexaCard is an independently maintained secondary-development branch based on the open-source Dujiao-Next project. NexaCard uses its own branding, release packages, update checks, documentation, and repositories under the `NexaCard` GitHub organization. See [NOTICE.md](./NOTICE.md).
 
-## Tech Stack
+## Default Ports
 
-- Go
-- Gin
-- GORM
-- SQLite / PostgreSQL
+- API: `5175`
+- Health check: `GET /health`
+- Admin dev proxy target: `http://localhost:5175`
+- User dev proxy target: `http://localhost:5175`
 
-## What This Service Does
+## Requirements
 
-- Serves REST APIs for user, order, and payment flows
-- Handles payment callbacks/webhooks
-- Supports product, fulfillment, and configuration management
+- Go `1.26.3`
+- Redis
+- SQLite by default, PostgreSQL optional
 
-## Quick Start
+## Local Development
 
 ```bash
-go mod tidy
-go run cmd/server/main.go
+go mod download
+go run ./cmd/server -mode api
 ```
 
-The default health check endpoint is:
+Use `config.yml.example` as the production template. The real `config.yml`, database files, uploads, and logs are intentionally ignored by git.
 
-- `GET /health`
+## Production Build
 
-## Repositories
+```bash
+go build -trimpath -tags release -ldflags="-s -w -X github.com/NexaCard/API/internal/version.Version=v1.0.0" -o nexacard-api ./cmd/server
+```
+
+Recommended runtime:
+
+```bash
+./nexacard-api -mode all
+```
+
+`-mode all` starts API and worker services together. Use `-mode api` or `-mode worker` only when splitting services.
+
+## Production Checklist
+
+- Set `server.mode: release`
+- Set `server.host: 127.0.0.1` when using a reverse proxy
+- Keep `server.port: 5175`
+- Replace `app.secret_key`, JWT secrets, and default admin credentials
+- Set explicit `cors.allowed_origins` for storefront and admin domains
+- Use a non-default `web.admin_path` if serving embedded fullstack builds
+
+## Release Updates
+
+The admin update check uses NexaCard releases only:
+
+- https://github.com/NexaCard/API/releases
+
+It does not point back to upstream Dujiao release channels.
+
+## Related Repositories
 
 - API: https://github.com/NexaCard/API
 - User: https://github.com/NexaCard/user
 - Admin: https://github.com/NexaCard/admin
+- Docs: https://github.com/NexaCard/docs

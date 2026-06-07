@@ -32,6 +32,6 @@ RUN apk --no-cache add ca-certificates tzdata \
 COPY --from=builder /out/nexacard-api /app/nexacard-api
 COPY config.yml.example /app/config.yml.example
 
-EXPOSE 8080
+EXPOSE 5175
 
 CMD ["./nexacard-api"]
