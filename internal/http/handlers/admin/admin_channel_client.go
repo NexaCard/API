@@ -3,9 +3,9 @@ package admin
 import (
 	"errors"
 
-	"github.com/dujiao-next/internal/http/handlers/shared"
-	"github.com/dujiao-next/internal/http/response"
-	"github.com/dujiao-next/internal/service"
+	"github.com/NexaCard/API/internal/http/handlers/shared"
+	"github.com/NexaCard/API/internal/http/response"
+	"github.com/NexaCard/API/internal/service"
 
 	"github.com/gin-gonic/gin"
 )

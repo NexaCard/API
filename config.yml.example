@@ -19,7 +19,7 @@ log:
 
 database:
   driver: sqlite  # sqlite / postgres
-  dsn: ./db/dujiao.db
+  dsn: ./db/nexacard.db
   pool:
     max_open_conns: 1
     max_idle_conns: 1

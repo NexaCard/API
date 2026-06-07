@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dujiao-next/internal/constants"
+	"github.com/NexaCard/API/internal/constants"
 
 	"gorm.io/gorm"
 )

@@ -5,10 +5,10 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/dujiao-next/internal/constants"
-	cryptoutil "github.com/dujiao-next/internal/crypto"
-	"github.com/dujiao-next/internal/models"
-	"github.com/dujiao-next/internal/repository"
+	"github.com/NexaCard/API/internal/constants"
+	cryptoutil "github.com/NexaCard/API/internal/crypto"
+	"github.com/NexaCard/API/internal/models"
+	"github.com/NexaCard/API/internal/repository"
 	"gorm.io/gorm"
 )
 

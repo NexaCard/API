@@ -15,7 +15,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dujiao-next/internal/config"
+	"github.com/NexaCard/API/internal/config"
 )
 
 type telegramSendMessageResponse struct {

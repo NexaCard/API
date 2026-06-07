@@ -3,10 +3,10 @@ package app
 import (
 	"errors"
 
-	"github.com/dujiao-next/internal/config"
-	"github.com/dujiao-next/internal/provider"
-	"github.com/dujiao-next/internal/router"
-	"github.com/dujiao-next/internal/worker"
+	"github.com/NexaCard/API/internal/config"
+	"github.com/NexaCard/API/internal/provider"
+	"github.com/NexaCard/API/internal/router"
+	"github.com/NexaCard/API/internal/worker"
 )
 
 // BuildRunner 构建服务运行器

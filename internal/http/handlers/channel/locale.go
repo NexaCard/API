@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/dujiao-next/internal/models"
+	"github.com/NexaCard/API/internal/models"
 )
 
 var htmlTagRe = regexp.MustCompile(`<[^>]*>`)

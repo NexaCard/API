@@ -5,9 +5,9 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/dujiao-next/internal/constants"
-	"github.com/dujiao-next/internal/models"
-	"github.com/dujiao-next/internal/payment/provider"
+	"github.com/NexaCard/API/internal/constants"
+	"github.com/NexaCard/API/internal/models"
+	"github.com/NexaCard/API/internal/payment/provider"
 )
 
 // recordingCapturer 捕获传入 ValidateConfig 的第二参数,用于回归测试。

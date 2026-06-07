@@ -1,6 +1,6 @@
 package service
 
-import "github.com/dujiao-next/internal/models"
+import "github.com/NexaCard/API/internal/models"
 
 // normalizeMaxPurchaseQuantity 归一化商品单次购买数量上限。
 func normalizeMaxPurchaseQuantity(value int) int {

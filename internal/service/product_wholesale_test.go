@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/dujiao-next/internal/models"
+	"github.com/NexaCard/API/internal/models"
 
 	"github.com/shopspring/decimal"
 )

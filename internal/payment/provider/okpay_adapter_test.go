@@ -9,9 +9,9 @@ import (
 
 	"github.com/shopspring/decimal"
 
-	"github.com/dujiao-next/internal/constants"
-	"github.com/dujiao-next/internal/models"
-	"github.com/dujiao-next/internal/payment/okpay"
+	"github.com/NexaCard/API/internal/constants"
+	"github.com/NexaCard/API/internal/models"
+	"github.com/NexaCard/API/internal/payment/okpay"
 )
 
 func TestOkpayAdapter_Type(t *testing.T) {

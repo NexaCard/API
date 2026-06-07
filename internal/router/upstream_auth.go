@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/dujiao-next/internal/constants"
-	"github.com/dujiao-next/internal/logger"
-	"github.com/dujiao-next/internal/repository"
-	"github.com/dujiao-next/internal/upstream"
+	"github.com/NexaCard/API/internal/constants"
+	"github.com/NexaCard/API/internal/logger"
+	"github.com/NexaCard/API/internal/repository"
+	"github.com/NexaCard/API/internal/upstream"
 
 	"github.com/gin-gonic/gin"
 )

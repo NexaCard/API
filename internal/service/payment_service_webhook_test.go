@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/dujiao-next/internal/constants"
+	"github.com/NexaCard/API/internal/constants"
 )
 
 func TestSupportsBlindWebhookCandidateMatching(t *testing.T) {

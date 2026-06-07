@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dujiao-next/internal/models"
+	"github.com/NexaCard/API/internal/models"
 )
 
 func TestAffiliateProfileRespOmitsSensitiveFields(t *testing.T) {

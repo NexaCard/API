@@ -3,7 +3,7 @@
 // models.DB，无需重复 config.Load / InitDB。
 //
 // 入口由 cmd/server/main.go 在检测到 "admin" 子命令时调用 Run(args)，
-// 容器只需要 dujiao-api 一个二进制即可执行所有运维操作。
+// 容器只需要 nexacard-api 一个二进制即可执行所有运维操作。
 package admincmd
 
 import (
@@ -15,9 +15,9 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/dujiao-next/internal/constants"
-	"github.com/dujiao-next/internal/models"
-	"github.com/dujiao-next/internal/repository"
+	"github.com/NexaCard/API/internal/constants"
+	"github.com/NexaCard/API/internal/models"
+	"github.com/NexaCard/API/internal/repository"
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -31,9 +31,9 @@ func Usage() {
 	fmt.Fprintln(os.Stderr, `admin 子命令: 后台管理员运维工具
 
 用法:
-  dujiao-api admin list-admins                            列出所有管理员
-  dujiao-api admin reset-2fa --username <name>            重置指定管理员的 2FA
-  dujiao-api admin reset-password --username <name> [--password <new>]
+  nexacard-api admin list-admins                          列出所有管理员
+  nexacard-api admin reset-2fa --username <name>          重置指定管理员的 2FA
+  nexacard-api admin reset-password --username <name> [--password <new>]
                                                           重置管理员密码（超管忘记密码恢复用）
                                                           不传 --password 时从 stdin 隐藏读入两次确认`)
 }

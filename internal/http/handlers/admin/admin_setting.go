@@ -1,10 +1,10 @@
 package admin
 
 import (
-	"github.com/dujiao-next/internal/cache"
-	"github.com/dujiao-next/internal/constants"
-	"github.com/dujiao-next/internal/http/handlers/shared"
-	"github.com/dujiao-next/internal/http/response"
+	"github.com/NexaCard/API/internal/cache"
+	"github.com/NexaCard/API/internal/constants"
+	"github.com/NexaCard/API/internal/http/handlers/shared"
+	"github.com/NexaCard/API/internal/http/response"
 
 	"github.com/gin-gonic/gin"
 )

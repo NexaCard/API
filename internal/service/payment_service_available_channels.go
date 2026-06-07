@@ -1,9 +1,9 @@
 package service
 
 import (
-	"github.com/dujiao-next/internal/constants"
-	"github.com/dujiao-next/internal/models"
-	"github.com/dujiao-next/internal/repository"
+	"github.com/NexaCard/API/internal/constants"
+	"github.com/NexaCard/API/internal/models"
+	"github.com/NexaCard/API/internal/repository"
 )
 
 // AvailablePaymentChannelFilter 可用支付渠道过滤参数

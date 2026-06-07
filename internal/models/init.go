@@ -3,7 +3,7 @@ package models
 import (
 	"strings"
 
-	"github.com/dujiao-next/internal/logger"
+	"github.com/NexaCard/API/internal/logger"
 
 	"golang.org/x/crypto/bcrypt"
 )

@@ -16,9 +16,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/dujiao-next/internal/cache"
-	"github.com/dujiao-next/internal/config"
-	"github.com/dujiao-next/internal/constants"
+	"github.com/NexaCard/API/internal/cache"
+	"github.com/NexaCard/API/internal/config"
+	"github.com/NexaCard/API/internal/constants"
 )
 
 // TelegramLoginPayload Telegram 登录载荷

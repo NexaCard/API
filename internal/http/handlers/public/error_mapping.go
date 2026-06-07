@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/dujiao-next/internal/constants"
-	"github.com/dujiao-next/internal/http/handlers/shared"
-	"github.com/dujiao-next/internal/http/response"
-	"github.com/dujiao-next/internal/i18n"
-	"github.com/dujiao-next/internal/service"
+	"github.com/NexaCard/API/internal/constants"
+	"github.com/NexaCard/API/internal/http/handlers/shared"
+	"github.com/NexaCard/API/internal/http/response"
+	"github.com/NexaCard/API/internal/i18n"
+	"github.com/NexaCard/API/internal/service"
 
 	"github.com/gin-gonic/gin"
 )

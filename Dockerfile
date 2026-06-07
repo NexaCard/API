@@ -20,7 +20,7 @@ RUN set -eux; \
     export GOOS="$TARGETOS" GOARCH="$TARGETARCH"; \
     if [ "$TARGETARCH" = "arm" ] && [ -n "$TARGETVARIANT" ]; then export GOARM="${TARGETVARIANT#v}"; fi; \
     if [ "$TARGETARCH" = "amd64" ] && [ -n "$TARGETVARIANT" ]; then export GOAMD64="${TARGETVARIANT#v}"; fi; \
-    go build -trimpath -tags release -ldflags="-s -w -X github.com/dujiao-next/internal/version.Version=${APP_VERSION}" -o /out/dujiao-api ./cmd/server
+    go build -trimpath -tags release -ldflags="-s -w -X github.com/NexaCard/API/internal/version.Version=${APP_VERSION}" -o /out/nexacard-api ./cmd/server
 
 FROM alpine:latest
 
@@ -29,9 +29,9 @@ WORKDIR /app
 RUN apk --no-cache add ca-certificates tzdata \
     && mkdir -p /app/db /app/uploads /app/logs
 
-COPY --from=builder /out/dujiao-api /app/dujiao-api
+COPY --from=builder /out/nexacard-api /app/nexacard-api
 COPY config.yml.example /app/config.yml.example
 
 EXPOSE 8080
 
-CMD ["./dujiao-api"]
+CMD ["./nexacard-api"]

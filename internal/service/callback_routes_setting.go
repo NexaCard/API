@@ -5,8 +5,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/dujiao-next/internal/constants"
-	"github.com/dujiao-next/internal/models"
+	"github.com/NexaCard/API/internal/constants"
+	"github.com/NexaCard/API/internal/models"
 )
 
 // CallbackRoutesSetting 回调路由配置

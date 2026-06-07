@@ -3,8 +3,8 @@ package admin
 import (
 	"strconv"
 
-	"github.com/dujiao-next/internal/http/handlers/shared"
-	"github.com/dujiao-next/internal/http/response"
+	"github.com/NexaCard/API/internal/http/handlers/shared"
+	"github.com/NexaCard/API/internal/http/response"
 
 	"github.com/gin-gonic/gin"
 )

@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	paymentcommon "github.com/dujiao-next/internal/payment/common"
+	paymentcommon "github.com/NexaCard/API/internal/payment/common"
 )
 
 // detachOutboundRequestContext 将出站请求从上游 HTTP 连接生命周期中解耦，

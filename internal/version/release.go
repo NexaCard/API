@@ -14,12 +14,12 @@ import (
 
 const (
 	// repoOwner GitHub 仓库所有者，用于检测最新发布版本
-	repoOwner = "dujiao-next"
+	repoOwner = "NexaCard"
 	// repoName GitHub 仓库名称
-	repoName = "dujiao-next"
+	repoName = "API"
 
 	githubAPIBaseURL = "https://api.github.com"
-	releaseUserAgent = "dujiao-next-update-checker"
+	releaseUserAgent = "nexacard-update-checker"
 )
 
 // releasePayload GitHub Releases API 响应中本检测器关心的字段
@@ -49,7 +49,7 @@ type CheckResult struct {
 var ErrRateLimited = errors.New("github api rate limit exceeded")
 
 // CheckLatestRelease 通过 GitHub Releases API 获取最新发行版并与当前版本比较。
-// 仓库地址固定为 dujiao-next/dujiao-next，不接受外部传入，避免 SSRF。
+// 仓库地址固定为 NexaCard/API，不接受外部传入，避免 SSRF 和误触上游更新源。
 func CheckLatestRelease(ctx context.Context) (*CheckResult, error) {
 	url := fmt.Sprintf("%s/repos/%s/%s/releases/latest", githubAPIBaseURL, repoOwner, repoName)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)

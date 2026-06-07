@@ -18,8 +18,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dujiao-next/internal/cache"
-	"github.com/dujiao-next/internal/constants"
+	"github.com/NexaCard/API/internal/cache"
+	"github.com/NexaCard/API/internal/constants"
 	"github.com/golang-jwt/jwt/v5"
 )
 

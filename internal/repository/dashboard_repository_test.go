@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dujiao-next/internal/constants"
-	"github.com/dujiao-next/internal/models"
+	"github.com/NexaCard/API/internal/constants"
+	"github.com/NexaCard/API/internal/models"
 
 	"github.com/glebarez/sqlite"
 	"github.com/shopspring/decimal"

@@ -13,8 +13,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dujiao-next/internal/logger"
-	"github.com/dujiao-next/internal/models"
+	"github.com/NexaCard/API/internal/logger"
+	"github.com/NexaCard/API/internal/models"
 
 	"github.com/google/uuid"
 )
@@ -43,7 +43,7 @@ func extractUpstreamErrorCode(err error) string {
 	return ""
 }
 
-// DujiaoNextAdapter Dujiao-Next 协议适配器
+// DujiaoNextAdapter NexaCard OpenAPI 兼容协议适配器
 type DujiaoNextAdapter struct {
 	baseURL    string
 	apiKey     string
@@ -52,7 +52,7 @@ type DujiaoNextAdapter struct {
 	client     *http.Client
 }
 
-// NewDujiaoNextAdapter 创建 Dujiao-Next 适配器
+// NewDujiaoNextAdapter 创建 NexaCard OpenAPI 兼容适配器
 func NewDujiaoNextAdapter(conn *models.SiteConnection, uploadsDir string) *DujiaoNextAdapter {
 	return &DujiaoNextAdapter{
 		baseURL:    strings.TrimRight(conn.BaseURL, "/"),

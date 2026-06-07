@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dujiao-next/internal/config"
+	"github.com/NexaCard/API/internal/config"
 )
 
 func TestUploadServiceSaveFileAllowsArchiveForTelegramScene(t *testing.T) {

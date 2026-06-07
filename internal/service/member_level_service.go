@@ -3,8 +3,8 @@ package service
 import (
 	"errors"
 
-	"github.com/dujiao-next/internal/models"
-	"github.com/dujiao-next/internal/repository"
+	"github.com/NexaCard/API/internal/models"
+	"github.com/NexaCard/API/internal/repository"
 
 	"github.com/shopspring/decimal"
 )

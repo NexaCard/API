@@ -5,9 +5,9 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/dujiao-next/internal/constants"
-	"github.com/dujiao-next/internal/models"
-	"github.com/dujiao-next/internal/payment/epusdt"
+	"github.com/NexaCard/API/internal/constants"
+	"github.com/NexaCard/API/internal/models"
+	"github.com/NexaCard/API/internal/payment/epusdt"
 )
 
 func TestEpusdtAdapter_Type(t *testing.T) {

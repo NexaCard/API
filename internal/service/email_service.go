@@ -13,12 +13,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dujiao-next/internal/config"
-	"github.com/dujiao-next/internal/constants"
-	"github.com/dujiao-next/internal/i18n"
-	"github.com/dujiao-next/internal/logger"
-	"github.com/dujiao-next/internal/models"
-	"github.com/dujiao-next/internal/telegramidentity"
+	"github.com/NexaCard/API/internal/config"
+	"github.com/NexaCard/API/internal/constants"
+	"github.com/NexaCard/API/internal/i18n"
+	"github.com/NexaCard/API/internal/logger"
+	"github.com/NexaCard/API/internal/models"
+	"github.com/NexaCard/API/internal/telegramidentity"
 )
 
 // writeStandardHeaders 写入 RFC 5322 要求的通用邮件头（Date、Message-ID、From、To、Subject、MIME-Version）。
@@ -193,7 +193,7 @@ func (s *EmailService) SendCustomEmail(toEmail, subject, body string) error {
 	}
 	body = strings.TrimSpace(body)
 	if body == "" {
-		body = "这是一封来自 Dujiao-Next 的 SMTP 测试邮件，说明当前配置可正常发送。"
+		body = "这是一封来自 NexaCard 的 SMTP 测试邮件，说明当前配置可正常发送。"
 	}
 	return s.sendTextEmail(toEmail, subject, body)
 }
@@ -251,7 +251,7 @@ func (s *EmailService) sendSMTPMessage(addr, toEmail string, msg []byte) error {
 }
 
 func buildEmailMessageWithAttachment(from, to, subject, body, attachName, attachContent string) string {
-	boundary := "----=_DujiaoNextBoundary_" + fmt.Sprintf("%d", len(body)+len(attachContent))
+	boundary := "----=_NexaCardBoundary_" + fmt.Sprintf("%d", len(body)+len(attachContent))
 
 	var buf bytes.Buffer
 	writeStandardHeaders(&buf, from, to, subject)

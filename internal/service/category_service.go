@@ -3,8 +3,8 @@ package service
 import (
 	"strconv"
 
-	"github.com/dujiao-next/internal/models"
-	"github.com/dujiao-next/internal/repository"
+	"github.com/NexaCard/API/internal/models"
+	"github.com/NexaCard/API/internal/repository"
 )
 
 // CategoryService 分类业务服务

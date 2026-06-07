@@ -3,7 +3,7 @@ package shared
 import (
 	"strings"
 
-	"github.com/dujiao-next/internal/service"
+	"github.com/NexaCard/API/internal/service"
 )
 
 // CaptchaPayloadRequest 验证码请求载荷。

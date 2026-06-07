@@ -4,9 +4,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dujiao-next/internal/constants"
-	"github.com/dujiao-next/internal/logger"
-	"github.com/dujiao-next/internal/repository"
+	"github.com/NexaCard/API/internal/constants"
+	"github.com/NexaCard/API/internal/logger"
+	"github.com/NexaCard/API/internal/repository"
 )
 
 // applyParentRefundChildStatusUpdates 根据父订单退款结果统一更新子订单状态。

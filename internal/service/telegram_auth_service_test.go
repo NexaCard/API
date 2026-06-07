@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dujiao-next/internal/config"
+	"github.com/NexaCard/API/internal/config"
 )
 
 func TestVerifyMiniAppInitDataSuccess(t *testing.T) {

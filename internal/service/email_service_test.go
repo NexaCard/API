@@ -10,9 +10,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dujiao-next/internal/config"
-	"github.com/dujiao-next/internal/i18n"
-	"github.com/dujiao-next/internal/models"
+	"github.com/NexaCard/API/internal/config"
+	"github.com/NexaCard/API/internal/i18n"
+	"github.com/NexaCard/API/internal/models"
 
 	"github.com/shopspring/decimal"
 )
@@ -438,7 +438,7 @@ func TestEmailServiceSendOffice365Integration(t *testing.T) {
 		Username: username,
 		Password: password,
 		From:     from,
-		FromName: "Dujiao Next",
+		FromName: "NexaCard",
 		UseTLS:   true,
 		UseSSL:   false,
 	})

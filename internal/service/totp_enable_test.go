@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dujiao-next/internal/crypto"
+	"github.com/NexaCard/API/internal/crypto"
 )
 
 func TestPrepareTOTPEnableRejectsExpiredPendingBeforeSideEffects(t *testing.T) {

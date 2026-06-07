@@ -3,7 +3,7 @@ package queue
 import (
 	"encoding/json"
 
-	"github.com/dujiao-next/internal/constants"
+	"github.com/NexaCard/API/internal/constants"
 
 	"github.com/hibiken/asynq"
 )

@@ -4,7 +4,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dujiao-next/internal/models"
+	"github.com/NexaCard/API/internal/models"
 )
 
 // OrderSummary 订单列表响应（精简字段）

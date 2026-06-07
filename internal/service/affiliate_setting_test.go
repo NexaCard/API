@@ -3,7 +3,7 @@ package service
 import (
 	"testing"
 
-	"github.com/dujiao-next/internal/constants"
+	"github.com/NexaCard/API/internal/constants"
 )
 
 func TestGetAffiliateSettingFallback(t *testing.T) {

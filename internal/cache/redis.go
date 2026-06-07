@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dujiao-next/internal/config"
-	"github.com/dujiao-next/internal/constants"
+	"github.com/NexaCard/API/internal/config"
+	"github.com/NexaCard/API/internal/constants"
 
 	"github.com/redis/go-redis/v9"
 )

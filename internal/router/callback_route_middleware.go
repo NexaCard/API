@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/dujiao-next/internal/constants"
-	publichandlers "github.com/dujiao-next/internal/http/handlers/public"
-	upstreamhandlers "github.com/dujiao-next/internal/http/handlers/upstream"
-	"github.com/dujiao-next/internal/service"
+	"github.com/NexaCard/API/internal/constants"
+	publichandlers "github.com/NexaCard/API/internal/http/handlers/public"
+	upstreamhandlers "github.com/NexaCard/API/internal/http/handlers/upstream"
+	"github.com/NexaCard/API/internal/service"
 
 	"github.com/gin-gonic/gin"
 )

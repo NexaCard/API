@@ -3,7 +3,7 @@ package bepusdt
 import (
 	"testing"
 
-	"github.com/dujiao-next/internal/constants"
+	"github.com/NexaCard/API/internal/constants"
 )
 
 func TestParseConfigAndNormalizeDefaults(t *testing.T) {

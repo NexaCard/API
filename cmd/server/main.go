@@ -7,13 +7,13 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/dujiao-next/internal/admincmd"
-	"github.com/dujiao-next/internal/app"
-	"github.com/dujiao-next/internal/config"
-	"github.com/dujiao-next/internal/logger"
-	"github.com/dujiao-next/internal/models"
-	"github.com/dujiao-next/internal/version"
-	"github.com/dujiao-next/internal/web"
+	"github.com/NexaCard/API/internal/admincmd"
+	"github.com/NexaCard/API/internal/app"
+	"github.com/NexaCard/API/internal/config"
+	"github.com/NexaCard/API/internal/logger"
+	"github.com/NexaCard/API/internal/models"
+	"github.com/NexaCard/API/internal/version"
+	"github.com/NexaCard/API/internal/web"
 
 	"github.com/gin-gonic/gin"
 )
@@ -29,7 +29,7 @@ const (
 )
 
 func main() {
-	// admin 子命令短路：./dujiao-api admin <subcommand>
+	// admin 子命令短路：./nexacard-api admin <subcommand>
 	// 在 banner / web 提示 / migrate / default admin / app.Run 之前处理，
 	// 避免运维操作时打印一堆无关日志。
 	if len(os.Args) >= 2 && os.Args[1] == "admin" {
@@ -87,7 +87,7 @@ func main() {
 	// 初始化默认管理员账号
 	defaultAdminUser, defaultAdminPass := resolveDefaultAdminCredentials(cfg)
 	if cfg.Server.Mode == "release" && defaultAdminPass == "" {
-		stdLog.Printf("警告: 未设置 DJ_DEFAULT_ADMIN_PASSWORD 且 bootstrap.default_admin_password 为空，已跳过默认管理员初始化")
+		stdLog.Printf("警告: 未设置 NEXACARD_DEFAULT_ADMIN_PASSWORD 且 bootstrap.default_admin_password 为空，已跳过默认管理员初始化")
 	} else if err := models.InitDefaultAdmin(defaultAdminUser, defaultAdminPass); err != nil {
 		stdLog.Printf("警告: 初始化默认管理员失败: %v", err)
 	}
@@ -136,7 +136,7 @@ func isWeakSecret(secret string) bool {
 	return false
 }
 
-// runAdminSubcommand 处理 ./dujiao-api admin <subcommand>，仅初始化 DB
+// runAdminSubcommand 处理 ./nexacard-api admin <subcommand>，仅初始化 DB
 // 后委托给 internal/admincmd 包，不启动 HTTP / worker / web 等服务。
 func runAdminSubcommand(args []string) {
 	cfg := config.Load()
@@ -154,8 +154,14 @@ func runAdminSubcommand(args []string) {
 
 // resolveDefaultAdminCredentials 解析默认管理员初始化凭据（环境变量优先，其次 config.yml）
 func resolveDefaultAdminCredentials(cfg *config.Config) (string, string) {
-	user := strings.TrimSpace(os.Getenv("DJ_DEFAULT_ADMIN_USERNAME"))
-	pass := strings.TrimSpace(os.Getenv("DJ_DEFAULT_ADMIN_PASSWORD"))
+	user := strings.TrimSpace(os.Getenv("NEXACARD_DEFAULT_ADMIN_USERNAME"))
+	pass := strings.TrimSpace(os.Getenv("NEXACARD_DEFAULT_ADMIN_PASSWORD"))
+	if user == "" {
+		user = strings.TrimSpace(os.Getenv("DJ_DEFAULT_ADMIN_USERNAME"))
+	}
+	if pass == "" {
+		pass = strings.TrimSpace(os.Getenv("DJ_DEFAULT_ADMIN_PASSWORD"))
+	}
 	if cfg == nil {
 		return user, pass
 	}

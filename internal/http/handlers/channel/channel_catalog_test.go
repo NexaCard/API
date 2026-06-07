@@ -8,15 +8,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dujiao-next/internal/provider"
-	"github.com/dujiao-next/internal/repository"
-	"github.com/dujiao-next/internal/service"
+	"github.com/NexaCard/API/internal/provider"
+	"github.com/NexaCard/API/internal/repository"
+	"github.com/NexaCard/API/internal/service"
 	"github.com/gin-gonic/gin"
 	"github.com/glebarez/sqlite"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 
-	"github.com/dujiao-next/internal/models"
+	"github.com/NexaCard/API/internal/models"
 )
 
 func TestNormalizeChannelManualFormSchemaUsesLocaleText(t *testing.T) {

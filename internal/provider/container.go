@@ -1,16 +1,16 @@
 package provider
 
 import (
-	"github.com/dujiao-next/internal/authz"
-	"github.com/dujiao-next/internal/cache"
-	"github.com/dujiao-next/internal/config"
-	"github.com/dujiao-next/internal/constants"
-	"github.com/dujiao-next/internal/logger"
-	"github.com/dujiao-next/internal/models"
-	paymentprovider "github.com/dujiao-next/internal/payment/provider"
-	"github.com/dujiao-next/internal/queue"
-	"github.com/dujiao-next/internal/repository"
-	"github.com/dujiao-next/internal/service"
+	"github.com/NexaCard/API/internal/authz"
+	"github.com/NexaCard/API/internal/cache"
+	"github.com/NexaCard/API/internal/config"
+	"github.com/NexaCard/API/internal/constants"
+	"github.com/NexaCard/API/internal/logger"
+	"github.com/NexaCard/API/internal/models"
+	paymentprovider "github.com/NexaCard/API/internal/payment/provider"
+	"github.com/NexaCard/API/internal/queue"
+	"github.com/NexaCard/API/internal/repository"
+	"github.com/NexaCard/API/internal/service"
 )
 
 // Container 依赖注入容器

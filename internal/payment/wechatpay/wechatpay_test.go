@@ -14,7 +14,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dujiao-next/internal/constants"
+	"github.com/NexaCard/API/internal/constants"
 )
 
 func TestParseAndValidateConfigRedirect(t *testing.T) {

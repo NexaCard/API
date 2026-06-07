@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dujiao-next/internal/constants"
+	"github.com/NexaCard/API/internal/constants"
 )
 
 func TestGetUpstreamSyncConfigFallbackToYaml(t *testing.T) {

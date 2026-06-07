@@ -4,10 +4,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dujiao-next/internal/constants"
-	"github.com/dujiao-next/internal/crypto"
-	"github.com/dujiao-next/internal/models"
-	"github.com/dujiao-next/internal/repository"
+	"github.com/NexaCard/API/internal/constants"
+	"github.com/NexaCard/API/internal/crypto"
+	"github.com/NexaCard/API/internal/models"
+	"github.com/NexaCard/API/internal/repository"
 )
 
 func TestSiteConnectionServicePingReturnsAdapterCreationError(t *testing.T) {

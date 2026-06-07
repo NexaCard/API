@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dujiao-next/internal/repository"
+	"github.com/NexaCard/API/internal/repository"
 )
 
 type dashboardServiceRepoStub struct {

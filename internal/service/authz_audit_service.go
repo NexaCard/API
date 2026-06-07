@@ -4,8 +4,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dujiao-next/internal/models"
-	"github.com/dujiao-next/internal/repository"
+	"github.com/NexaCard/API/internal/models"
+	"github.com/NexaCard/API/internal/repository"
 )
 
 // AuthzAuditRecordInput 权限审计记录输入

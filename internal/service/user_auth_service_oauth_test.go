@@ -7,11 +7,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dujiao-next/internal/config"
-	"github.com/dujiao-next/internal/constants"
-	"github.com/dujiao-next/internal/models"
-	"github.com/dujiao-next/internal/repository"
-	"github.com/dujiao-next/internal/telegramidentity"
+	"github.com/NexaCard/API/internal/config"
+	"github.com/NexaCard/API/internal/constants"
+	"github.com/NexaCard/API/internal/models"
+	"github.com/NexaCard/API/internal/repository"
+	"github.com/NexaCard/API/internal/telegramidentity"
 
 	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"

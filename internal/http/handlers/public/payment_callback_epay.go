@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/dujiao-next/internal/constants"
-	"github.com/dujiao-next/internal/http/handlers/shared"
-	"github.com/dujiao-next/internal/models"
+	"github.com/NexaCard/API/internal/constants"
+	"github.com/NexaCard/API/internal/http/handlers/shared"
+	"github.com/NexaCard/API/internal/models"
 
 	"github.com/gin-gonic/gin"
 )

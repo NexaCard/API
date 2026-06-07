@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dujiao-next/internal/constants"
-	"github.com/dujiao-next/internal/models"
+	"github.com/NexaCard/API/internal/constants"
+	"github.com/NexaCard/API/internal/models"
 )
 
 // 上游商品状态相关哨兵错误（adapter 层归一化）

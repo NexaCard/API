@@ -3,7 +3,7 @@ package repository
 import (
 	"errors"
 
-	"github.com/dujiao-next/internal/models"
+	"github.com/NexaCard/API/internal/models"
 
 	"gorm.io/gorm"
 )

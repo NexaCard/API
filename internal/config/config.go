@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/dujiao-next/internal/constants"
-	"github.com/dujiao-next/internal/logger"
+	"github.com/NexaCard/API/internal/constants"
+	"github.com/NexaCard/API/internal/logger"
 
 	"github.com/spf13/viper"
 )
@@ -292,7 +292,7 @@ func Load() *Config {
 	viper.SetDefault("log.max_age_days", 30)
 	viper.SetDefault("log.compress", true)
 	viper.SetDefault("database.driver", "sqlite")
-	viper.SetDefault("database.dsn", "./db/dujiao.db")
+	viper.SetDefault("database.dsn", "./db/nexacard.db")
 	viper.SetDefault("database.pool.max_open_conns", 1)
 	viper.SetDefault("database.pool.max_idle_conns", 1)
 	viper.SetDefault("database.pool.conn_max_lifetime_seconds", 0)

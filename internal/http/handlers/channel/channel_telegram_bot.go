@@ -3,8 +3,8 @@ package channel
 import (
 	"time"
 
-	"github.com/dujiao-next/internal/logger"
-	"github.com/dujiao-next/internal/service"
+	"github.com/NexaCard/API/internal/logger"
+	"github.com/NexaCard/API/internal/service"
 
 	"github.com/gin-gonic/gin"
 )

@@ -13,7 +13,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dujiao-next/internal/config"
+	"github.com/NexaCard/API/internal/config"
 )
 
 type rewriteTelegramTransport struct {

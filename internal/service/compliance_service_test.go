@@ -3,13 +3,13 @@ package service
 import (
 	"testing"
 
-	"github.com/dujiao-next/internal/models"
+	"github.com/NexaCard/API/internal/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
-	"github.com/dujiao-next/internal/repository"
+	"github.com/NexaCard/API/internal/repository"
 )
 
 func newTestComplianceService(t *testing.T) (*ComplianceService, *gorm.DB) {

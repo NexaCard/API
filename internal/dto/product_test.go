@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dujiao-next/internal/models"
+	"github.com/NexaCard/API/internal/models"
 )
 
 func TestCategoryRespOmitsSensitiveFields(t *testing.T) {

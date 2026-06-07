@@ -1,7 +1,7 @@
 package dto
 
 import (
-	"github.com/dujiao-next/internal/models"
+	"github.com/NexaCard/API/internal/models"
 )
 
 // BannerResp 前台 Banner 响应

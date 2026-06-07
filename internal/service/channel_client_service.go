@@ -5,10 +5,10 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/dujiao-next/internal/crypto"
-	"github.com/dujiao-next/internal/models"
-	"github.com/dujiao-next/internal/repository"
-	"github.com/dujiao-next/internal/upstream"
+	"github.com/NexaCard/API/internal/crypto"
+	"github.com/NexaCard/API/internal/models"
+	"github.com/NexaCard/API/internal/repository"
+	"github.com/NexaCard/API/internal/upstream"
 )
 
 // ChannelClientService 渠道客户端业务服务

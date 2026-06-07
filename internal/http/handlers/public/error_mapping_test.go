@@ -7,8 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/dujiao-next/internal/http/response"
-	"github.com/dujiao-next/internal/service"
+	"github.com/NexaCard/API/internal/http/response"
+	"github.com/NexaCard/API/internal/service"
 
 	"github.com/gin-gonic/gin"
 )

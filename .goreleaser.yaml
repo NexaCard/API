@@ -1,6 +1,6 @@
-version: 2
+﻿version: 2
 
-project_name: dujiao-next
+project_name: nexacard-api
 
 before:
   hooks:
@@ -11,9 +11,9 @@ builds:
     env:
       - CGO_ENABLED=0
     main: ./cmd/server
-    binary: dujiao-next
+    binary: nexacard-api
     ldflags:
-      - -s -w -X github.com/dujiao-next/internal/version.Version={{.Tag}}
+      - -s -w -X github.com/NexaCard/API/internal/version.Version={{.Tag}}
     flags:
       - "-tags=release"
     goos:
@@ -31,9 +31,9 @@ builds:
     env:
       - CGO_ENABLED=0
     main: ./cmd/server
-    binary: dujiao-server
+    binary: nexacard-server
     ldflags:
-      - -s -w -X github.com/dujiao-next/internal/version.Version={{.Tag}}
+      - -s -w -X github.com/NexaCard/API/internal/version.Version={{.Tag}}
     flags:
       - "-tags=release,fullstack"
     goos:
@@ -70,7 +70,7 @@ archives:
       - ./config.yml.example
       - ./README.md
     name_template: >-
-      dujiao-all_
+      nexacard-all_
       {{- .Tag }}_
       {{- title .Os }}_
       {{- if eq .Arch "amd64" }}x86_64
@@ -110,6 +110,6 @@ release:
   footer: >-
     ---
 
-    ## 📚 Documentation（在线文档）
-    - [Installation Guide](https://dujiao-next.com/deploy/)
-    - [部署指南](https://dujiao-next.com/deploy/)
+    ## Documentation
+    - [NexaCard Docs](https://github.com/NexaCard/docs)
+    - [Deployment Guide](https://github.com/NexaCard/docs/tree/main/docs/deploy)

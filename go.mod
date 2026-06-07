@@ -1,4 +1,4 @@
-module github.com/dujiao-next
+module github.com/NexaCard/API
 
 go 1.26.3
 

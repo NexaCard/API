@@ -3,7 +3,7 @@ package public
 import (
 	"strings"
 
-	"github.com/dujiao-next/internal/logger"
+	"github.com/NexaCard/API/internal/logger"
 
 	"github.com/gin-gonic/gin"
 )

@@ -5,15 +5,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dujiao-next/internal/cache"
-	"github.com/dujiao-next/internal/constants"
-	"github.com/dujiao-next/internal/dto"
-	"github.com/dujiao-next/internal/http/handlers/shared"
-	"github.com/dujiao-next/internal/http/response"
-	"github.com/dujiao-next/internal/i18n"
-	"github.com/dujiao-next/internal/models"
-	"github.com/dujiao-next/internal/service"
-	"github.com/dujiao-next/internal/version"
+	"github.com/NexaCard/API/internal/cache"
+	"github.com/NexaCard/API/internal/constants"
+	"github.com/NexaCard/API/internal/dto"
+	"github.com/NexaCard/API/internal/http/handlers/shared"
+	"github.com/NexaCard/API/internal/http/response"
+	"github.com/NexaCard/API/internal/i18n"
+	"github.com/NexaCard/API/internal/models"
+	"github.com/NexaCard/API/internal/service"
+	"github.com/NexaCard/API/internal/version"
 
 	"github.com/gin-gonic/gin"
 )
@@ -107,7 +107,7 @@ func (h *Handler) GetConfig(c *gin.Context) {
 		"languages":                        append([]string(nil), constants.SupportedLocales...),
 		constants.SettingFieldSiteCurrency: constants.SiteCurrencyDefault,
 		"contact": map[string]interface{}{
-			"telegram": "https://t.me/dujiaoka",
+			"telegram": "",
 			"whatsapp": "https://wa.me/1234567890",
 		},
 		"scripts": make([]interface{}, 0),

@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 
-	"github.com/dujiao-next/internal/config"
-	"github.com/dujiao-next/internal/logger"
-	"github.com/dujiao-next/internal/queue"
-	"github.com/dujiao-next/internal/service"
+	"github.com/NexaCard/API/internal/config"
+	"github.com/NexaCard/API/internal/logger"
+	"github.com/NexaCard/API/internal/queue"
+	"github.com/NexaCard/API/internal/service"
 
 	"github.com/hibiken/asynq"
 )

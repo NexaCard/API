@@ -7,11 +7,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dujiao-next/internal/cache"
-	"github.com/dujiao-next/internal/config"
-	"github.com/dujiao-next/internal/crypto"
-	"github.com/dujiao-next/internal/models"
-	"github.com/dujiao-next/internal/repository"
+	"github.com/NexaCard/API/internal/cache"
+	"github.com/NexaCard/API/internal/config"
+	"github.com/NexaCard/API/internal/crypto"
+	"github.com/NexaCard/API/internal/models"
+	"github.com/NexaCard/API/internal/repository"
 
 	"github.com/pquerna/otp/totp"
 	"github.com/redis/go-redis/v9"

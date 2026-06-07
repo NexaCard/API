@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dujiao-next/internal/authz"
+	"github.com/NexaCard/API/internal/authz"
 
 	"github.com/casbin/casbin/v3/util"
 )

@@ -3,7 +3,7 @@ package service
 import (
 	"strconv"
 
-	"github.com/dujiao-next/internal/models"
+	"github.com/NexaCard/API/internal/models"
 )
 
 // ReapplyMarkup 对指定连接的所有映射商品重新应用加价规则

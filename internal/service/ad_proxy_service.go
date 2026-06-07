@@ -10,8 +10,8 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/dujiao-next/internal/adgateway"
-	"github.com/dujiao-next/internal/logger"
+	"github.com/NexaCard/API/internal/adgateway"
+	"github.com/NexaCard/API/internal/logger"
 )
 
 // AdProxyService 代理广告请求到 ad-system

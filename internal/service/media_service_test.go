@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dujiao-next/internal/models"
-	"github.com/dujiao-next/internal/repository"
+	"github.com/NexaCard/API/internal/models"
+	"github.com/NexaCard/API/internal/repository"
 	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
 )

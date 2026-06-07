@@ -1,7 +1,7 @@
 package shared
 
 import (
-	"github.com/dujiao-next/internal/models"
+	"github.com/NexaCard/API/internal/models"
 
 	"github.com/gin-gonic/gin"
 )

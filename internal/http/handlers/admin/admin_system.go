@@ -5,9 +5,9 @@ import (
 	"errors"
 	"time"
 
-	"github.com/dujiao-next/internal/http/handlers/shared"
-	"github.com/dujiao-next/internal/http/response"
-	"github.com/dujiao-next/internal/version"
+	"github.com/NexaCard/API/internal/http/handlers/shared"
+	"github.com/NexaCard/API/internal/http/response"
+	"github.com/NexaCard/API/internal/version"
 
 	"github.com/gin-gonic/gin"
 )

@@ -5,10 +5,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dujiao-next/internal/cache"
-	"github.com/dujiao-next/internal/constants"
-	"github.com/dujiao-next/internal/models"
-	"github.com/dujiao-next/internal/telegramidentity"
+	"github.com/NexaCard/API/internal/cache"
+	"github.com/NexaCard/API/internal/constants"
+	"github.com/NexaCard/API/internal/models"
+	"github.com/NexaCard/API/internal/telegramidentity"
 
 	"golang.org/x/crypto/bcrypt"
 )

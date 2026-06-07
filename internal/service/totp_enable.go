@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dujiao-next/internal/crypto"
+	"github.com/NexaCard/API/internal/crypto"
 )
 
 type totpEnableInput struct {

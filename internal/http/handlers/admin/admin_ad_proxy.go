@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/dujiao-next/internal/http/response"
+	"github.com/NexaCard/API/internal/http/response"
 	"github.com/gin-gonic/gin"
 )
 

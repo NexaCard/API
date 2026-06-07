@@ -10,14 +10,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dujiao-next/internal/constants"
-	"github.com/dujiao-next/internal/http/handlers/shared"
-	"github.com/dujiao-next/internal/logger"
-	"github.com/dujiao-next/internal/models"
-	"github.com/dujiao-next/internal/provider"
-	"github.com/dujiao-next/internal/repository"
-	"github.com/dujiao-next/internal/service"
-	upstreamadapter "github.com/dujiao-next/internal/upstream"
+	"github.com/NexaCard/API/internal/constants"
+	"github.com/NexaCard/API/internal/http/handlers/shared"
+	"github.com/NexaCard/API/internal/logger"
+	"github.com/NexaCard/API/internal/models"
+	"github.com/NexaCard/API/internal/provider"
+	"github.com/NexaCard/API/internal/repository"
+	"github.com/NexaCard/API/internal/service"
+	upstreamadapter "github.com/NexaCard/API/internal/upstream"
 
 	"github.com/gin-gonic/gin"
 )

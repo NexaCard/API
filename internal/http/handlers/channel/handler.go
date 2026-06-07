@@ -1,6 +1,6 @@
 package channel
 
-import "github.com/dujiao-next/internal/provider"
+import "github.com/NexaCard/API/internal/provider"
 
 // Handler 渠道 API 处理器（Telegram Bot 等外部服务调用的接口）
 type Handler struct {

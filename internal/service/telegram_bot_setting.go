@@ -3,8 +3,8 @@ package service
 import (
 	"strings"
 
-	"github.com/dujiao-next/internal/constants"
-	"github.com/dujiao-next/internal/models"
+	"github.com/NexaCard/API/internal/constants"
+	"github.com/NexaCard/API/internal/models"
 )
 
 // LocalizedText 多语言文本 {"zh-CN": "...", "zh-TW": "...", "en-US": "..."}

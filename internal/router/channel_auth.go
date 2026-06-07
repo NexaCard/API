@@ -5,12 +5,12 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/dujiao-next/internal/http/response"
-	"github.com/dujiao-next/internal/i18n"
-	"github.com/dujiao-next/internal/logger"
-	"github.com/dujiao-next/internal/provider"
-	"github.com/dujiao-next/internal/service"
-	"github.com/dujiao-next/internal/upstream"
+	"github.com/NexaCard/API/internal/http/response"
+	"github.com/NexaCard/API/internal/i18n"
+	"github.com/NexaCard/API/internal/logger"
+	"github.com/NexaCard/API/internal/provider"
+	"github.com/NexaCard/API/internal/service"
+	"github.com/NexaCard/API/internal/upstream"
 
 	"github.com/gin-gonic/gin"
 )

@@ -7,10 +7,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
 
-	"github.com/dujiao-next/internal/dto"
-	"github.com/dujiao-next/internal/http/handlers/shared"
-	"github.com/dujiao-next/internal/http/response"
-	"github.com/dujiao-next/internal/service"
+	"github.com/NexaCard/API/internal/dto"
+	"github.com/NexaCard/API/internal/http/handlers/shared"
+	"github.com/NexaCard/API/internal/http/response"
+	"github.com/NexaCard/API/internal/service"
 )
 
 // AffiliateTrackClickRequest 推广点击记录请求

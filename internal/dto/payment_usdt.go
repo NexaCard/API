@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/dujiao-next/internal/constants"
-	"github.com/dujiao-next/internal/models"
+	"github.com/NexaCard/API/internal/constants"
+	"github.com/NexaCard/API/internal/models"
 )
 
 // ExtractUSDTWalletInfo 从 Payment.ProviderPayload 中提取 USDT 收款钱包地址和链上实付金额。
